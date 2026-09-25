@@ -12,3 +12,5 @@ Offline habit tracker, single-file HTML/CSS/JS. Solo Leveling-style XP/rank prog
 ## Usage
 Open the HTML file in a browser. No install, no server, no dependencies.
 
+#THE SYSTEM
+https://ryd1m.github.io/Hunter-System/
