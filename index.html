@@ -1,0 +1,1933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hunter System</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230C0C18'/%3E%3Crect x='2' y='2' width='60' height='60' rx='12' fill='%238B5CF6'/%3E%3Ctext x='32' y='45' font-family='Georgia,serif' font-size='38' font-weight='700' fill='white' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07070E;--surface:#0C0C18;--card:#101020;--card2:#13132A;
+  --border:rgba(120,80,255,0.1);--border2:rgba(120,80,255,0.28);
+  --purple:#8B5CF6;--blue:#3B82F6;--cyan:#06B6D4;--amber:#F59E0B;
+  --red:#EF4444;--green:#10B981;--gray:#6B7280;
+  --incomplete:#B91C1C;--incomplete-track:rgba(185,28,28,.32);
+  --text:#E2E8F0;--text2:#94A3B8;--text3:#4B5563;
+  --font:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono','Consolas',monospace;
+}
+html{overflow-x:hidden;width:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;overflow-x:hidden;width:100%}
+.app{max-width:860px;margin:0 auto;padding:2rem 1.25rem 5rem;overflow-x:hidden}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.1rem 1.4rem;margin-bottom:1rem;overflow:hidden}
+.lbl{font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--text3);margin-bottom:.5rem;font-weight:500}
+.hw{display:grid;grid-template-columns:1fr auto;gap:1rem;align-items:flex-start;margin-bottom:1rem}
+.hid{font-family:var(--mono);font-size:28px;font-weight:500;letter-spacing:.06em}
+.rv{font-family:var(--mono);font-size:48px;font-weight:500;line-height:1;text-align:right}
+.xl{display:flex;justify-content:space-between;font-size:9px;color:var(--text3);margin-bottom:4px}
+.xb{height:5px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden;margin-bottom:8px}
+.xf{height:100%;border-radius:3px;transition:width .4s ease}
+.cdc{display:flex;justify-content:space-between;align-items:center;background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.18);border-radius:14px;padding:1rem 1.4rem;margin-bottom:1.25rem}
+.cdn{font-family:var(--mono);font-size:52px;font-weight:500;color:var(--amber);line-height:1}
+.tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:4px;margin-bottom:1.25rem}
+.tab{flex:1;padding:8px 0;border:none;background:transparent;color:var(--text3);font-family:var(--font);font-size:12px;font-weight:500;border-radius:8px;cursor:pointer;transition:all .15s}
+.tab.active{background:var(--card2);color:var(--text);border:1px solid var(--border2)}
+.panel{display:none}.panel.active{display:block}
+.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:1rem}
+.st{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:.75rem 1rem;text-align:center}
+.sv{font-family:var(--mono);font-size:22px;font-weight:500}
+.sl{font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:var(--text3);margin-top:2px}
+.sc{border-radius:14px;border:1px solid var(--border);background:var(--card);margin-bottom:.875rem;overflow:hidden}
+.sch{display:flex;justify-content:space-between;align-items:center;padding:.8rem 1.4rem;border-bottom:1px solid var(--border)}
+.scn{font-weight:500;font-size:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.bc{font-size:9px;letter-spacing:.06em;text-transform:uppercase;background:rgba(239,68,68,.1);color:#F87171;border:1px solid rgba(239,68,68,.15);border-radius:4px;padding:2px 6px}
+.bk{font-size:9px;text-transform:uppercase;color:var(--text3);letter-spacing:.06em}
+.scc{font-size:12px;font-family:var(--mono);color:var(--text3);flex-shrink:0}
+.wb{padding:6px 1.4rem;background:rgba(239,68,68,.04);border-bottom:1px solid rgba(239,68,68,.08);font-size:11px;color:#F87171;line-height:1.45}
+.tr{display:flex;align-items:flex-start;gap:10px;padding:10px 1.4rem;border-bottom:1px solid var(--border);position:relative;transition:opacity .12s}
+.tr:hover{background:rgba(255,255,255,.015)}
+.tr:hover .db{opacity:1}
+@keyframes slideOut{to{opacity:0;transform:translateX(14px);max-height:0;padding-top:0;padding-bottom:0;border:none}}
+.tr.vanishing{animation:slideOut .42s ease forwards;pointer-events:none;overflow:hidden}
+.cb{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border2);background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;cursor:pointer;transition:all .15s}
+.cb.on{background:var(--purple);border-color:var(--purple)}
+.cb svg{width:10px;height:10px;stroke:#fff;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.tt{font-size:13px;color:var(--text2);line-height:1.5;flex:1;cursor:pointer;word-break:break-word}
+.tt.done{text-decoration:line-through;color:var(--text3);opacity:.55}
+.txp{margin-left:5px;font-size:10px;font-family:var(--mono);color:var(--purple);opacity:.55}
+.ttag{margin-left:5px;font-size:9px;font-family:var(--mono);color:var(--cyan);opacity:.7}
+.db{opacity:0;transition:opacity .15s;background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;line-height:1;flex-shrink:0;padding:1px 4px;border-radius:4px}
+.db:hover{color:var(--red);background:rgba(239,68,68,.1)}
+.sd-link{padding:8px 1.4rem;font-size:11px;color:var(--text3);cursor:pointer;border-top:1px solid var(--border);display:flex;align-items:center;gap:5px;transition:color .12s;background:none;border-left:none;border-right:none;border-bottom:none;width:100%;font-family:var(--font);text-align:left}
+.sd-link:hover{color:var(--text2)}
+.es{padding:1rem 1.4rem;font-size:12px;color:var(--text3);font-style:italic}
+.aa{padding:10px 1.4rem;border-top:1px solid var(--border);background:rgba(255,255,255,.01)}
+.tr-row{display:flex;gap:4px;margin-bottom:7px}
+.tb{flex:1;padding:5px 0;border:1px solid var(--border);background:transparent;color:var(--text3);font-family:var(--font);font-size:10px;font-weight:500;border-radius:6px;cursor:pointer;transition:all .12s}
+.tb.st{background:rgba(6,182,212,.1);border-color:rgba(6,182,212,.3);color:var(--cyan)}
+.tb.sb{background:rgba(139,92,246,.1);border-color:rgba(139,92,246,.3);color:var(--purple)}
+.tb.sm{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.3);color:var(--amber)}
+.ar{display:flex;gap:8px}
+.ai{flex:1;background:transparent;border:none;border-bottom:1px solid var(--border2);color:var(--text2);font-family:var(--font);font-size:13px;padding:3px 0;outline:none;transition:border .15s}
+.ai::placeholder{color:var(--text3)}.ai:focus{border-bottom-color:var(--purple)}
+.ab{padding:5px 13px;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.2);color:var(--purple);font-family:var(--font);font-size:12px;font-weight:500;border-radius:7px;cursor:pointer;white-space:nowrap;transition:all .15s}
+.ab:hover{background:rgba(139,92,246,.18)}
+.tq{background:rgba(245,158,11,.04);border:1px solid rgba(245,158,11,.15);border-radius:11px;padding:.75rem 1rem;margin-bottom:1rem}
+.ti{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(245,158,11,.08);font-size:12px;color:var(--text2);gap:8px}
+.ti:last-child{border-bottom:none}
+.nta{width:100%;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:9px;color:var(--text2);font-family:var(--font);font-size:13px;line-height:1.65;padding:10px 13px;resize:vertical;min-height:90px;outline:none;transition:border .15s}
+.nta:focus{border-color:var(--border2)}
+.arow{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.btn{padding:8px 16px;font-family:var(--font);font-size:12px;font-weight:500;border-radius:8px;cursor:pointer;transition:all .15s}
+.bs{padding:5px 12px;font-size:11px;background:rgba(255,255,255,.03);border:1px solid var(--border);color:var(--text3)}
+.bs.sel{background:rgba(139,92,246,.15);border-color:var(--border2);color:var(--purple)}
+.bp{background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.22);color:var(--purple)}
+.bp:hover{background:rgba(139,92,246,.16)}
+.bp.ok{color:var(--green);border-color:rgba(16,185,129,.22);background:rgba(16,185,129,.08)}
+.bg{background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.2);color:var(--green)}
+.bg:hover{background:rgba(16,185,129,.14)}
+.ba{background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.2);color:var(--blue)}
+.ba:hover{background:rgba(59,130,246,.14)}
+.br{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);color:var(--red)}
+.br:hover{background:rgba(239,68,68,.14)}
+.hr{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);gap:12px}
+.hr:last-child{border-bottom:none}
+.hbw{flex:1;height:5px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden}
+.hbr{height:100%;border-radius:3px;background:var(--purple)}
+.stit{font-size:11px;color:var(--text2);font-weight:500;margin-bottom:.875rem;padding-bottom:7px;border-bottom:1px solid var(--border)}
+.il{font-size:11px;color:var(--text3);margin-bottom:4px;display:block}
+.inf{width:100%;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-family:var(--font);font-size:13px;padding:8px 11px;outline:none;transition:border .15s;margin-bottom:10px}
+.inf:focus{border-color:var(--border2)}
+.slf{width:100%;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-family:var(--font);font-size:13px;padding:8px 11px;outline:none;margin-bottom:10px;cursor:pointer}
+.sww{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.sw{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .12s;flex-shrink:0}
+.sw.sel{border-color:#fff;transform:scale(1.18)}
+.sjl{display:flex;flex-direction:column;gap:8px;margin-bottom:1.25rem}
+.sjr{display:flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 12px}
+.sjn{flex:1;font-size:13px;font-weight:500}
+.sjc{font-size:10px;color:var(--text3);font-family:var(--mono)}
+.tgl{width:34px;height:18px;border-radius:9px;border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.tgl::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:#fff;border-radius:50%;transition:transform .2s}
+.tgl.on{background:var(--green)}.tgl.on::after{transform:translateX(16px)}
+.tgl.off{background:var(--gray)}
+.ib{background:none;border:1px solid var(--border);color:var(--text3);border-radius:7px;padding:4px 9px;cursor:pointer;font-size:11px;font-family:var(--font);transition:all .12s;white-space:nowrap}
+.ib:hover{border-color:var(--border2);color:var(--text)}
+.ib.d:hover{border-color:rgba(239,68,68,.3);color:var(--red);background:rgba(239,68,68,.08)}
+.ep{background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:1rem;margin-top:6px}
+.spw{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.spp{font-size:11px;color:var(--text3);background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:20px;padding:3px 12px}
+/* Data section */
+.data-info{font-size:12px;color:var(--text3);line-height:1.7;margin-bottom:1rem;padding:10px 12px;background:rgba(255,255,255,.02);border-radius:9px;border:1px solid var(--border)}
+.data-info strong{color:var(--text2)}
+.data-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:.75rem}
+.file-label{padding:8px 16px;font-family:var(--font);font-size:12px;font-weight:500;border-radius:8px;cursor:pointer;transition:all .15s;background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.2);color:var(--blue);display:inline-block}
+.file-label:hover{background:rgba(59,130,246,.14)}
+.file-label input{display:none}
+.di{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px;line-height:1.5;position:relative}
+.di:last-child{border-bottom:none}
+.di:hover .di-del{opacity:1}
+.di-del{opacity:0;position:absolute;right:0;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:2px 6px;border-radius:4px;transition:opacity .15s}
+.di-del:hover{color:var(--red);background:rgba(239,68,68,.1)}
+.dream-add{padding-top:.875rem;border-top:1px solid var(--border);margin-top:.25rem}
+.dream-inp-row{display:flex;gap:8px;margin-bottom:8px;align-items:center}
+.icon-inp{width:44px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:18px;padding:5px;text-align:center;outline:none;transition:border .15s}
+.icon-inp:focus{border-color:var(--border2)}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+/* Stats tab: side-by-side on wider screens, stacked on mobile */
+.stats-row2{display:flex;gap:14px;align-items:flex-start}
+.stats-row2>.card{flex:1;min-width:0}
+@media(max-width:580px){
+  .sg{grid-template-columns:repeat(2,1fr)}.cdn{font-size:36px}.hid{font-size:20px}.rv{font-size:32px}
+  .tb{font-size:9px}.tabs .tab{font-size:10px}.data-btns{flex-direction:column}
+  .stats-row2{flex-direction:column; width: 100%;max-width: 100%;}  
+  .stats-row2>.card {width: 100%;min-width: 0;}
+  .hr{flex-wrap:wrap;gap:4px}
+  .hr>span:first-child{min-width:0!important;flex:1 1 auto}
+  .hr>span:last-child{min-width:0!important}
+  .hr .hbw{flex:1 1 100%;order:3;margin-top:2px}
+  .arow{flex-wrap:wrap}
+  .arow .btn{flex:1 1 auto;min-width:120px}
+  .app{padding-left:.75rem;padding-right:.75rem}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- HUNTER CARD -->
+<div class="card" style="border-top:2px solid var(--purple);margin-bottom:1.25rem">
+  <div class="hw">
+    <div>
+      <div class="lbl">Hunter ID</div>
+      <div class="hid" id="h-name">HUNTER</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:.875rem" id="h-sub">Active · Solo Hunter</div>
+      <div class="xl"><span>Rank → <span id="nr">D</span></span><span id="rp">0%</span></div>
+      <div class="xb"><div class="xf" id="rb" style="width:0%"></div></div>
+      <div class="xl"><span id="dxl">Today: 0 XP</span><span id="dpl">0 / 0 quests</span></div>
+      <div class="xb"><div class="xf" id="db2" style="width:0%;background:var(--blue)"></div></div>
+    </div>
+    <div>
+      <div style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);text-align:right;margin-bottom:4px">Rank</div>
+      <div class="rv" id="rd" style="color:var(--purple)">E</div>
+      <div style="font-size:11px;color:var(--purple);text-align:right;margin-top:3px;font-weight:600;font-family:var(--mono)" id="lvd">Lv. 1</div>
+      <div id="lvbw" style="width:70px;height:3px;background:rgba(139,92,246,.15);border-radius:2px;margin:4px 0 0 auto;overflow:hidden"><div id="lvb" style="height:100%;width:0%;background:var(--purple);border-radius:2px"></div></div>
+      <div style="font-size:11px;color:var(--text3);text-align:right;margin-top:5px;font-family:var(--mono)" id="txl">0 XP</div>
+    </div>
+  </div>
+</div>
+
+<!-- COUNTDOWN -->
+<div class="cdc" id="cdc">
+  <div>
+    <div style="font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:rgba(245,158,11,.6);margin-bottom:5px" id="cdl">Deadline</div>
+    <div style="font-size:16px;font-weight:500;color:var(--text);margin-bottom:3px" id="cdd">—</div>
+    <div style="font-size:12px;color:var(--text3)" id="cds">—</div>
+  </div>
+  <div style="text-align:center">
+    <div class="cdn" id="cdn">—</div>
+    <div style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:rgba(245,158,11,.6);margin-top:2px">days left</div>
+  </div>
+</div>
+<div id="cd-more" style="margin-bottom:1.25rem"></div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab active" onclick="switchTab(this,'today')">Today</button>
+  <button class="tab" onclick="switchTab(this,'history')">History</button>
+  <button class="tab" onclick="switchTab(this,'stats')">Stats</button>
+  <button class="tab" onclick="switchTab(this,'settings')">Settings</button>
+  <button class="tab" onclick="switchTab(this,'dreams')">Dreams</button>
+</div>
+
+<!-- TODAY -->
+<div class="panel active" id="panel-today">
+  <div class="sg">
+    <div class="st"><div class="sv" id="s1">0/0</div><div class="sl">Done</div></div>
+    <div class="st"><div class="sv" id="s2" style="color:var(--amber)">0</div><div class="sl">Streak 🔥</div></div>
+    <div class="st"><div class="sv" id="s3" style="color:var(--purple)">0</div><div class="sl">XP today</div></div>
+  </div>
+  <div id="tq-wrap" style="display:none">
+    <div class="tq">
+      <div class="lbl" style="color:rgba(245,158,11,.7)">Queued for tomorrow</div>
+      <div id="tq-list"></div>
+    </div>
+  </div>
+  <div id="board"></div>
+  <div class="card" style="border-left:3px solid var(--incomplete)" id="bad-wrap">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem">
+      <div class="lbl" style="color:var(--incomplete);margin-bottom:0">⚠️ Bad Habits</div>
+      <span id="bad-count" style="font-size:11px;color:var(--text3);font-family:var(--mono)"></span>
+    </div>
+    <div id="bad-list"></div>
+    <div id="bad-add"></div>
+  </div>
+  <div class="card">
+    <div class="lbl">Daily log</div>
+    <textarea class="nta" id="nta" placeholder="What got done, what got skipped, and why. Be honest."></textarea>
+    <div class="arow">
+      <button class="btn ba" onclick="addNoteEntry()">+ Add entry</button>
+    </div>
+    <div class="arow" style="margin-top:8px">
+      <button class="btn bp" id="sbtn" onclick="saveDay()">Save &amp; close day</button>
+      <button class="btn bg" onclick="markAllDone()" title="Marks every remaining task as complete, then saves">✓ Mark all complete</button>
+    </div>
+  </div>
+  <div class="card" id="sealed-wrap" style="display:none">
+    <div class="lbl">Inactive subjects</div>
+    <div class="spw" id="sealed-list"></div>
+    <div style="font-size:11px;color:var(--text3);margin-top:8px">Enable in Settings → Subjects when ready.</div>
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div class="panel" id="panel-history">
+  <div class="card"><div class="lbl">History</div><div id="hl"><div style="color:var(--text3);font-size:13px;padding:.75rem 0">No history yet.</div></div></div>
+  <div class="card"><div class="lbl">Notes log</div><div id="hn-summary"><div style="color:var(--text3);font-size:13px;padding:.75rem 0">No notes yet.</div></div></div>
+  <div class="card"><div class="lbl">All entries</div><div id="hn-detail"><div style="color:var(--text3);font-size:13px;padding:.75rem 0">No notes yet.</div></div></div>
+</div>
+
+<!-- STATS -->
+<div class="panel" id="panel-stats">
+  <div class="card">
+    <div class="lbl">By subject</div>
+    <div id="stat-subjects"></div>
+  </div>
+  <div class="stats-row2">
+    <div class="card">
+      <div class="lbl">Consistency</div>
+      <div id="stat-heatmap"></div>
+    </div>
+    <div class="card">
+      <div class="lbl">Daily output</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Theme-colored = matched or beat the day before · red = dropped off</div>
+      <div id="stat-daily"></div>
+    </div>
+  </div>
+  <div class="stats-row2">
+    <div class="card">
+      <div class="lbl">XP over time</div>
+      <div id="stat-xpchart"></div>
+    </div>
+    <div class="card">
+      <div class="lbl">Totals</div>
+      <div class="arow" style="margin-bottom:10px">
+        <button class="btn bs sel" id="tpb-day" onclick="setTotalsPeriod('day')">Day</button>
+        <button class="btn bs" id="tpb-week" onclick="setTotalsPeriod('week')">Week</button>
+        <button class="btn bs" id="tpb-month" onclick="setTotalsPeriod('month')">Month</button>
+        <button class="btn bs" id="tpb-year" onclick="setTotalsPeriod('year')">Year</button>
+      </div>
+      <div id="stat-totals"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="panel" id="panel-settings">
+
+  <!-- DATA MANAGEMENT — top so it's always easy to find -->
+  <div class="card">
+    <div class="stit">💾 Your data</div>
+    <div class="data-info">
+      <strong>Where it lives:</strong> this browser's localStorage on this device.<br>
+      Chrome and Firefox have separate storage — pick one and stick to it.<br>
+      Incognito mode = data gone when tab closes. Normal mode = stays until you clear it.<br><br>
+      <strong>Backup regularly</strong> — export keeps a copy on your PC that survives browser resets.
+    </div>
+    <div class="data-btns">
+      <button class="btn ba" onclick="exportData()">⬇ Export backup (.json)</button>
+      <label class="file-label">⬆ Import backup <input type="file" accept=".json" onchange="importData(this)"></label>
+    </div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:1rem;line-height:1.6">
+      Export saves everything: XP, rank, history, subjects, tasks, streak, notes.<br>
+      Import loads it all back — works after a reset, browser switch, or new device.<br>
+      <strong style="color:var(--text2)">Reset first, then import = clean restore.</strong>
+    </div>
+    <div style="padding-top:1rem;border-top:1px solid var(--border)">
+      <div class="lbl" style="color:rgba(239,68,68,.5)">Reset</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:10px;line-height:1.6">
+        Wipes everything — XP, rank, history, subjects, tasks, streak, notes.<br>
+        Export a backup first if you want to restore later.
+      </div>
+      <button class="btn br" onclick="resetAll()">Reset everything</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="stit">⏳ Deadlines</div>
+    <div id="deadlines-list"></div>
+  </div>
+
+  <div class="card">
+    <div class="stit">⚠️ Bad habits</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:10px;line-height:1.6">Things you're trying to avoid. Check one off on the Today tab if it happened — it costs XP (never below 0 for the day) and can tint that day red on the Stats heatmap if it outweighs what you got done.</div>
+    <div id="badhabits-list"></div>
+  </div>
+
+  <div class="card">
+    <div class="stit">🪪 Profile</div>
+    <label class="il">Hunter name</label>
+    <input type="text" class="inf" id="ci-name" placeholder="e.g. HUNTER01" maxlength="30">
+    <label class="il">Subtitle</label>
+    <input type="text" class="inf" id="ci-sub2" placeholder="e.g. Active · Solo Hunter" maxlength="60">
+    <label class="il">XP per completed task</label>
+    <input type="number" class="inf" id="ci-xptask" min="1" max="1000">
+    <label class="il">XP penalty per bad habit</label>
+    <input type="number" class="inf" id="ci-xpbad" min="0" max="1000">
+    <button class="btn bp" onclick="saveCfg()">Save profile</button>
+  </div>
+
+  <div class="card">
+    <div class="stit">📋 Subjects — add anything here</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:1rem;line-height:1.65;padding:9px 11px;background:rgba(255,255,255,.02);border-radius:8px;border:1px solid var(--border)">
+      Subjects are just categories — name them anything.<br>
+      <strong style="color:var(--text2)">Examples:</strong> Study · Workout · Code · Reading · Sleep schedule<br>
+      Toggle the switch to seal/unseal. New semester? Swap subjects here — XP and history stay.
+    </div>
+    <div class="sjl" id="slist"></div>
+    <div style="padding-top:1rem;border-top:1px solid var(--border)">
+      <div class="lbl" style="margin-bottom:.75rem">Add new subject</div>
+      <label class="il">Name</label>
+      <input type="text" class="inf" id="ns-n" placeholder="e.g. Workout, Code, OOP, Running..." maxlength="40">
+      <label class="il">Color</label>
+      <div class="sww" id="ns-sw"></div>
+      <label class="il">Priority</label>
+      <select class="slf" id="ns-p">
+        <option value="HIGH">High</option>
+        <option value="CRITICAL">Critical</option>
+        <option value="KEEP_ALIVE">Keep alive</option>
+        <option value="NORMAL">Normal</option>
+      </select>
+      <label class="il">Warning message (optional)</label>
+      <input type="text" class="inf" id="ns-w" placeholder="e.g. Don't skip this" maxlength="120">
+      <button class="btn bp" onclick="addSubj()">+ Add subject</button>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:rgba(139,92,246,.15)">
+    <div class="lbl" style="color:rgba(139,92,246,.6)">Clear subjects only</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:10px;line-height:1.6">Removes all subjects and their base tasks so you can start a fresh set (e.g. new semester, new goals). XP, history, and streak are untouched.</div>
+    <button class="btn bp" onclick="resetSubjsOnly()">Clear all subjects</button>
+  </div>
+
+</div>
+
+<!-- DREAMS -->
+<div class="panel" id="panel-dreams">
+  <div id="dreams-list"></div>
+  <div id="goals-list"></div>
+  <div id="quotes-list"></div>
+</div>
+
+</div>
+<script>
+// ════════════════════════════════════════════════════════
+//  HUNTER SYSTEM
+//  Fully offline · localStorage · export/import backup
+// ════════════════════════════════════════════════════════
+
+const DEFAULT_CFG={hunterName:'HUNTER01',subtitle:'Active · Solo Hunter',xpPerTask:25,xpPerBadHabit:15};
+
+// Multiple deadlines — each: {id, label, date, subtext, icon, color}. Ships empty.
+const DEFAULT_DEADLINES=[];
+const getDeadlines=()=>_g('hs:deadlines',JSON.parse(JSON.stringify(DEFAULT_DEADLINES)));
+const setDeadlines=v=>_s('hs:deadlines',v);
+let dlColor=null;
+
+// Bad habits — things you're trying to avoid. Checking one off means it happened that day.
+// Ships empty; you define your own from Settings.
+const DEFAULT_BADHABITS=[];
+const getBadHabits=()=>_g('hs:badhabits',JSON.parse(JSON.stringify(DEFAULT_BADHABITS)));
+const setBadHabits=v=>_s('hs:badhabits',v);
+const getBadChecks=(date)=>_g('hs:bad:'+(date||TODAY),[]);
+const setBadChecks=(v,date)=>_s('hs:bad:'+(date||TODAY),v);
+let bhColor=null;
+
+// One-time migration: fold the old single cfg.deadline into the new list, if one was set.
+function migrateLegacyDeadline(){
+  if(_g('hs:deadlineMigrated',false))return;
+  try{
+    const raw=localStorage.getItem('hs:cfg');
+    if(raw){
+      const cfg=JSON.parse(raw);
+      if(cfg.deadline&&cfg.deadline.date){
+        const list=getDeadlines();
+        list.push({id:'dl_'+Date.now(),label:cfg.deadline.label||'Deadline',date:cfg.deadline.date,subtext:cfg.deadline.subtext||'',icon:'⏳',color:COLORS[3]});
+        setDeadlines(list);
+      }
+    }
+  }catch{}
+  _s('hs:deadlineMigrated',true);
+}
+
+// Ships with ZERO subjects and ZERO tasks — you build your own board from Settings → Subjects.
+// Name subjects anything: Workout, Code, Reading, Running, whatever fits your goals.
+const DEFAULT_SUBJECTS=[];
+
+const COLORS=['#3B82F6','#8B5CF6','#06B6D4','#F59E0B','#10B981','#EF4444','#F472B6','#FB923C','#6B7280','#A78BFA'];
+const RANKS=['E','D','C','B','A','S','SS','SSS','National','Monarch'];
+const THRESHOLDS=[0,500,1500,3000,5000,8000,12000,17000,23000,30000];
+const RC={E:'#9CA3AF',D:'#4ADE80',C:'#60A5FA',B:'#A78BFA',A:'#FBBF24',S:'#F87171',SS:'#F472B6',SSS:'#FB923C',National:'#EAB308',Monarch:'#8B5CF6'};
+
+// ── INFINITE RANK PROGRESSION ────────────────────────────
+// Ranks 0-9 are the named tiers above (E → Monarch). Past that, rank never dead-ends:
+// Monarch II..X (numerals), then Monarch AA, AB, AC... (spreadsheet-style letters), forever.
+// Each tier also needs more XP than the last — always harder to reach the next one.
+function colLetters(n){ // n>=1 -> A, B, ... Z, AA, AB...
+  let s='';
+  while(n>0){n--;s=String.fromCharCode(65+(n%26))+s;n=Math.floor(n/26);}
+  return s;
+}
+function rankNameForIndex(i){
+  if(i<RANKS.length)return RANKS[i];
+  const extra=i-RANKS.length;
+  const roman=['II','III','IV','V','VI','VII','VIII','IX','X'];
+  if(extra<roman.length)return 'Monarch '+roman[extra];
+  return 'Monarch '+colLetters(extra-roman.length+1);
+}
+// XP threshold for a given rank index (0-based). Beyond Monarch, each gap grows by 1000 more than the last.
+function thresholdForIndex(i){
+  if(i<THRESHOLDS.length)return THRESHOLDS[i];
+  let cum=THRESHOLDS[THRESHOLDS.length-1],k=1;
+  for(let idx=THRESHOLDS.length;idx<=i;idx++){cum+=7000+1000*k;k++;}
+  return cum;
+}
+function rankIndexForXP(xp){
+  if(!isFinite(xp)||xp<0)xp=0; // corrupted/Infinity/NaN XP can never reach the loop below
+  if(xp<THRESHOLDS[THRESHOLDS.length-1]){
+    for(let j=THRESHOLDS.length-1;j>=0;j--)if(xp>=THRESHOLDS[j])return j;
+    return 0;
+  }
+  let cum=THRESHOLDS[THRESHOLDS.length-1],idx=THRESHOLDS.length-1,k=1;
+  while(xp>=cum+(7000+1000*k)){cum+=(7000+1000*k);idx++;k++;if(k>1e6)break;}
+  return idx;
+}
+
+// ── INFINITE LEVELING ────────────────────────────────────
+// Level 1 starts at 0 XP. Each level requires more XP than the last (LEVEL_BASE * level),
+// so it's always harder to reach the next one, forever — no cap.
+const LEVEL_BASE=100;
+function levelForXP(xp){
+  const X=xp/LEVEL_BASE;
+  return Math.max(1,Math.floor((1+Math.sqrt(1+8*X))/2));
+}
+function levelStartXP(lvl){return Math.round(LEVEL_BASE*(lvl-1)*lvl/2);}
+function levelEndXP(lvl){return Math.round(LEVEL_BASE*lvl*(lvl+1)/2);}
+
+function stats(){
+  const subjs=getSubjs(),d=getDD(),xp=(getCfg().xpPerTask)||25,bhxp=(getCfg().xpPerBadHabit)??15;
+  let tot=0,done=0;
+  subjs.filter(s=>s.active).forEach(s=>{
+    (s.tasks||[]).forEach((_,i)=>{tot++;if(d.checks[s.id+':r:'+i])done++;});
+    (d.extras||[]).filter(e=>e.subjectId===s.id).forEach((_,i)=>{tot++;if(d.checks[s.id+':e:'+i])done++;});
+  });
+  const badCount=getBadChecks().length;
+  // rawTodXP can go negative if bad-habit penalties outweigh what you earned today — that's
+  // what actually gets saved and permanently counted toward your total, so excessive bad
+  // habits really do eat into accumulated XP, not just cancel out today's own number.
+  const rawTodXP=done*xp-badCount*bhxp;
+  const todXP=Math.max(0,rawTodXP); // what's DISPLAYED for "today" — this alone never shows negative
+  const pastXP=getHist().filter(h=>h.date!==TODAY).reduce((a,h)=>a+(h.xp||0),0);
+  const totXP=Math.max(0,pastXP+rawTodXP); // grand total floors at 0 overall, but a bad-enough day can pull it down
+  const ri=rankIndexForXP(totXP);
+  const rank=rankNameForIndex(ri);
+  const curT=thresholdForIndex(ri),nextT=thresholdForIndex(ri+1);
+  const pct=Math.max(0,Math.min(100,Math.round(((totXP-curT)/(nextT-curT))*100)));
+  const level=levelForXP(totXP);
+  const lvStart=levelStartXP(level),lvEnd=levelEndXP(level);
+  const levelPct=Math.max(0,Math.min(100,Math.round(((totXP-lvStart)/(lvEnd-lvStart))*100)));
+  return{done,tot,todXP,totXP,rank,pct,nextRank:rankNameForIndex(ri+1),xp,level,levelPct,levelXpToNext:Math.max(0,lvEnd-totXP),badCount,rawTodXP};
+}
+const CHK='<svg viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9.5 10.5,2.5"/></svg>';
+const TODAY=new Date().toISOString().split('T')[0];
+// TODAY is UTC-derived, so any "day before X" calculation must also use UTC arithmetic —
+// parsing a date string as LOCAL midnight and subtracting a local day introduces an
+// off-by-one for any timezone ahead of UTC (this caused a real streak bug for UTC+6 users).
+function dayBefore(dateStr){
+  const d=new Date(dateStr+'T00:00:00Z');
+  d.setUTCDate(d.getUTCDate()-1);
+  return d.toISOString().split('T')[0];
+}
+
+const shownDone=new Set();
+const notesExpanded=new Set();
+let historyPrevOpen=false;
+let nsColor=COLORS[0],editId=null,editClr=null;
+
+// ── STORAGE ──────────────────────────────────────────────
+const _g=(k,fb)=>{try{const v=localStorage.getItem(k);return v!==null?JSON.parse(v):fb;}catch{return fb;}};
+let _storageWarned=false;
+function _storageFailWarn(){
+  if(_storageWarned)return; // only warn once per session — this can fail repeatedly, don't spam alerts
+  _storageWarned=true;
+  alert('⚠️ Could not save — your browser storage may be full. Recent changes might not have been saved. Export a backup now if you can, and consider clearing old data.');
+}
+const _s=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{_storageFailWarn();}};
+const _ss=(k,v)=>{try{localStorage.setItem(k,v);}catch{_storageFailWarn();}};
+const _gs=(k,fb)=>{try{return localStorage.getItem(k)||fb;}catch{return fb;}};
+
+const getCfg=()=>_g('hs:cfg',DEFAULT_CFG);
+const setCfg=v=>_s('hs:cfg',v);
+const getSubjs=()=>_g('hs:subjs',JSON.parse(JSON.stringify(DEFAULT_SUBJECTS)));
+const setSubjs=v=>_s('hs:subjs',v);
+const getDD=()=>_g('hs:d:'+TODAY,{checks:{},extras:[]});
+const setDD=v=>_s('hs:d:'+TODAY,v);
+const getTmr=()=>_g('hs:tmr',[]);
+const setTmr=v=>_s('hs:tmr',v);
+const getHist=()=>_g('hs:hist',[]);
+const getStreak=()=>_g('hs:streak',0);
+const getLast=()=>_gs('hs:last','');
+
+// Live streak: today's in-progress activity counts immediately, not just after saving/rollover.
+// This only affects the DISPLAYED number — the stored hs:streak value is only ever
+// written by saveDay() or the auto-recovery safety net, so nothing here can corrupt it.
+function liveStreak(){
+  const base=getStreak();
+  const last=getLast();
+  if(last===TODAY)return base; // today already officially closed out
+  const{done}=stats();
+  if(done<=0)return base; // no activity yet today — don't inflate
+  const yest=dayBefore(TODAY);
+  if(last===yest)return base+1; // continuing an existing streak
+  return 1; // streak had broken, but today's activity starts a fresh one
+}
+const getNoteLog=(date)=>_g('hs:nlog:'+(date||TODAY),[]);
+const setNoteLog=(v,date)=>_s('hs:nlog:'+(date||TODAY),v);
+
+// All hs: keys (for export/import/reset)
+function getAllHsKeys(){
+  try{return Object.keys(localStorage).filter(k=>k.startsWith('hs:'));}catch{return [];}
+}
+
+// ── DATA MANAGEMENT ──────────────────────────────────────
+
+// Export: downloads a JSON file with everything
+function exportData(){
+  const data={};
+  getAllHsKeys().forEach(k=>{
+    try{data[k]=JSON.parse(localStorage.getItem(k));}
+    catch{data[k]=localStorage.getItem(k);}
+  });
+  data['__exported__']=new Date().toISOString();
+  data['__version__']=1;
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='hunter_backup_'+TODAY+'.json';
+  document.body.appendChild(a);a.click();
+  setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},1000);
+}
+
+// Which shape each known persistent key should have — used to catch corrupted/hand-edited
+// backups before they're written, instead of writing garbage that crashes the app later.
+const IMPORT_SHAPE={
+  'hs:subjs':'array','hs:hist':'array','hs:deadlines':'array','hs:badhabits':'array',
+  'hs:dreams':'array','hs:goals':'array','hs:quotes':'array','hs:tmr':'array',
+  'hs:cfg':'object','hs:streak':'number'
+};
+function importShapeOk(key,value){
+  const expected=IMPORT_SHAPE[key];
+  if(!expected)return true; // dynamic/per-date keys and flags aren't enumerable — accept as-is
+  if(expected==='array')return Array.isArray(value);
+  if(expected==='object')return value!==null&&typeof value==='object'&&!Array.isArray(value);
+  if(expected==='number')return typeof value==='number'&&!isNaN(value);
+  return true;
+}
+
+// Import: loads a backup JSON and reloads the page
+function importData(input){
+  const file=input.files[0];if(!file)return;
+  if(!confirm('This will replace your current data with the backup. Continue?')){input.value='';return;}
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      // Validate it looks like a hunter backup
+      const keys=Object.keys(data).filter(k=>k.startsWith('hs:'));
+      if(!keys.length){alert('This file does not look like a valid Hunter System backup.');input.value='';return;}
+      // Check each known key's shape before writing anything — reject the whole import if a
+      // core collection is corrupted, rather than silently loading broken data that crashes later.
+      const badKeys=keys.filter(k=>!importShapeOk(k,data[k]));
+      if(badKeys.length){
+        alert('This backup looks corrupted — these fields aren\'t shaped correctly: '+badKeys.join(', ')+'. Nothing was imported, your current data is untouched.');
+        input.value='';return;
+      }
+      // Clear existing hs: data
+      getAllHsKeys().forEach(k=>localStorage.removeItem(k));
+      // Load backup. hs:last (and any other raw, non-JSON key) round-trips through export as a
+      // plain string — JSON.stringify-ing it here would wrap it in quotes and corrupt it, since
+      // it's read back with a raw getItem() (_gs), not JSON.parse(). Write strings as-is.
+      keys.forEach(k=>{
+        const v=data[k];
+        if(typeof v==='string')localStorage.setItem(k,v);
+        else{
+          try{localStorage.setItem(k,JSON.stringify(v));}
+          catch{localStorage.setItem(k,String(v));}
+        }
+      });
+      alert('Backup loaded successfully. Reloading...');
+      location.reload();
+    }catch{alert('Could not read file. Make sure it\'s a valid Hunter System .json backup.');input.value='';}
+  };
+  reader.readAsText(file);
+}
+
+// Reset everything
+function resetAll(){
+  if(!confirm('RESET EVERYTHING?\n\nThis deletes all XP, rank, history, subjects, tasks, streak, and notes.\n\nExport a backup first if you want to recover later.\n\nCannot be undone.'))return;
+  getAllHsKeys().forEach(k=>localStorage.removeItem(k));
+  alert('All data cleared. Reloading...');
+  location.reload();
+}
+
+// Reset subjects only
+function resetSubjsOnly(){
+  if(!confirm('Clear all subjects? Custom subjects and base tasks will be removed. XP and history are safe.'))return;
+  _s('hs:subjs',JSON.parse(JSON.stringify(DEFAULT_SUBJECTS)));
+  editId=null;editClr=null;
+  renderSList();renderBoard();renderCard();renderSealed();
+}
+
+// Migrate legacy single-blob notes (hs:n:<date>) into the new append-only log format.
+// Runs once; existing notes become a single unstamped entry so nothing is lost.
+function migrateLegacyNotes(){
+  if(_g('hs:notesMigrated',false))return;
+  try{
+    Object.keys(localStorage).forEach(k=>{
+      if(k.startsWith('hs:n:')){
+        const date=k.slice(5);
+        const val=localStorage.getItem(k);
+        if(val&&val.trim()){
+          const existing=_g('hs:nlog:'+date,[]);
+          if(!existing.length)_s('hs:nlog:'+date,[{t:'',text:val}]);
+        }
+      }
+    });
+  }catch{}
+  _s('hs:notesMigrated',true);
+}
+
+// ── INIT ─────────────────────────────────────────────────
+// SAFETY NET: any past day's raw checkbox data that never got explicitly saved
+// (i.e. the day rolled over before you clicked "Save & close day") gets automatically
+// promoted into permanent history here, before it's ever at risk of being cleaned up.
+// This runs every time the app loads, so progress can no longer be silently lost
+// just because a day passed without a manual save.
+function autoCommitPastDays(){
+  const hist=getHist();
+  const savedDates=new Set(hist.map(h=>h.date));
+  const subjs=getSubjs(),cfg=getCfg();
+  const pending=[];
+  try{
+    Object.keys(localStorage).forEach(k=>{
+      if(!k.startsWith('hs:d:'))return;
+      const date=k.slice(5);
+      if(date===TODAY||savedDates.has(date))return;
+      let dd;try{dd=JSON.parse(localStorage.getItem(k));}catch{return;}
+      if(!dd||!dd.checks)return;
+      pending.push({date,dd});
+    });
+  }catch{}
+  if(!pending.length)return 0;
+  pending.sort((a,b)=>a.date.localeCompare(b.date)); // oldest first, so streak math stays correct
+
+  let recovered=0;
+  pending.forEach(({date,dd})=>{
+    let tot=0,done=0;
+    const bySubject=[];
+    // Use ALL subjects here (not just currently-active ones) — if a subject was sealed
+    // after you worked in it but before this day got recovered, its checkbox data is
+    // still real and shouldn't silently vanish just because it's inactive now.
+    subjs.forEach(s=>{
+      let sDone=0,sTot=0;
+      (s.tasks||[]).forEach((_,i)=>{tot++;sTot++;if(dd.checks[s.id+':r:'+i]){done++;sDone++;}});
+      (dd.extras||[]).filter(e=>e.subjectId===s.id).forEach((_,i)=>{tot++;sTot++;if(dd.checks[s.id+':e:'+i]){done++;sDone++;}});
+      if(sTot>0)bySubject.push({id:s.id,name:s.name,color:s.color,done:sDone,total:sTot});
+    });
+    if(tot===0)return; // nothing was ever on the board that day — nothing to recover
+    const badChecks=getBadChecks(date);
+    const badHabits=getBadHabits().filter(h=>badChecks.includes(h.id)).map(h=>({id:h.id,name:h.name,icon:h.icon,color:h.color}));
+    const xp=done*(cfg.xpPerTask||25)-badHabits.length*(cfg.xpPerBadHabit??15); // raw, can be negative
+    const notesLog=getNoteLog(date);
+    const notes=notesLog.map(n=>n.text).join('\n');
+    const h2=getHist();
+    h2.push({date,done,total:tot,xp,notes,notesLog,bySubject,badHabits,badCount:badHabits.length,autoRecovered:true});
+    _s('hs:hist',h2);
+    // Keep the streak counter honest for the recovered date — but only days with real
+    // activity should extend it. A recorded "0 done" day still shows correctly in
+    // History/Stats, but must NOT count as a streak day (checkStreakGap will correctly
+    // treat it as a gap the next time the app loads).
+    if(done>0){
+      const prevStr=dayBefore(date);
+      const last=getLast();
+      if(last===prevStr)_s('hs:streak',getStreak()+1);
+      else if(last!==date)_s('hs:streak',1);
+      _ss('hs:last',date);
+    }
+    recovered++;
+  });
+  return recovered;
+}
+
+// Catches the case autoCommitPastDays can't: a day with truly ZERO interaction never gets
+// an hs:d: key at all, so there's nothing for auto-recovery to find or process there — the
+// streak would otherwise just sit frozen at its last value forever, ignoring the gap.
+function checkStreakGap(){
+  const last=getLast();
+  if(!last||last===TODAY)return; // never used before, or already up to date today
+  if(last!==dayBefore(TODAY))_s('hs:streak',0); // last known activity isn't yesterday — streak broke
+}
+
+function init(){
+  migrateLegacyNotes();
+  migrateLegacyDeadline();
+  // Guarantee today leaves a trace the moment the app opens, even with zero interaction —
+  // otherwise a day where nothing was checked off produces no hs:d: key at all, and
+  // tomorrow's auto-recovery has nothing to find, silently skipping that day everywhere
+  // (History, Stats, heatmap) instead of correctly showing it as "0 done".
+  if(localStorage.getItem('hs:d:'+TODAY)===null)setDD({checks:{},extras:[]});
+  const recoveredCount=autoCommitPastDays();
+  checkStreakGap();
+  if(!_g('hs:tp:'+TODAY,false)){
+    const tmr=getTmr();
+    if(tmr.length){const d=getDD();d.extras=[...(d.extras||[]),...tmr];setDD(d);setTmr([]);}
+    _s('hs:tp:'+TODAY,true);
+  }
+  try{Object.keys(localStorage).forEach(k=>{
+    if((k.startsWith('hs:d:')||k.startsWith('hs:tp:'))&&!k.endsWith(TODAY)){
+      const ds=k.split(':').pop();
+      if(ds&&(new Date(TODAY)-new Date(ds))>3*86400000)localStorage.removeItem(k);
+    }
+  });}catch{}
+  renderCD();renderCard();renderBoard();renderTmr();renderSealed();renderDreams();renderBadHabits();
+  loadCfgForm();renderSList();renderDeadlines();renderBadHabitSettings();
+  document.getElementById('nta').value='';
+  setInterval(renderCD,60000);
+  if(recoveredCount>0)alert('Recovered '+recoveredCount+' day'+(recoveredCount===1?'':'s')+' of progress that hadn\'t been saved. Check History — they\'re marked "auto-recovered."');
+}
+
+// ── COMPUTE ──────────────────────────────────────────────
+// (stats() now lives up top, next to the infinite rank/level system it depends on)
+
+// ── RENDER COUNTDOWN ─────────────────────────────────────
+let deadlinesMoreOpen=false;
+function toggleMoreDeadlines(){deadlinesMoreOpen=!deadlinesMoreOpen;renderCD();}
+
+function renderCD(){
+  const cdc=document.getElementById('cdc');
+  const moreEl=document.getElementById('cd-more');
+  const all=getDeadlines();
+  const upcoming=all.filter(d=>d.date>=TODAY).sort((a,b)=>a.date.localeCompare(b.date));
+
+  if(!upcoming.length){
+    if(cdc)cdc.style.display='none';
+    if(moreEl)moreEl.innerHTML='';
+    return;
+  }
+  if(cdc)cdc.style.display='flex';
+
+  const near=upcoming[0];
+  const d=new Date(near.date+'T12:00:00');
+  const days=Math.max(0,Math.ceil((new Date(near.date+'T00:00:00Z')-new Date())/86400000));
+  document.getElementById('cdl').textContent=(near.icon?near.icon+' ':'')+(near.label||'Deadline');
+  document.getElementById('cdd').textContent=d.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  document.getElementById('cds').textContent=near.subtext||'';
+  document.getElementById('cdn').textContent=days;
+
+  const rest=upcoming.slice(1);
+  if(!moreEl)return;
+  if(!rest.length){moreEl.innerHTML='';return;}
+  const open=deadlinesMoreOpen;
+  let html=`<button class="sd-link" onclick="toggleMoreDeadlines()">${open?'▲ Hide':'▼ Show'} ${rest.length} more upcoming</button>`;
+  if(open){
+    html+=rest.map(dl=>{
+      const dys=Math.max(0,Math.ceil((new Date(dl.date+'T00:00:00Z')-new Date())/86400000));
+      const dlab=new Date(dl.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+      return`<div class="hr"><span style="font-size:13px;color:var(--text2)">${x(dl.icon||'⏳')} ${x(dl.label)}${dl.color?` <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${dl.color};margin-left:4px"></span>`:''}</span><span style="color:var(--text3);font-size:11px;font-family:var(--mono)">${dlab} · ${dys}d</span></div>`;
+    }).join('');
+  }
+  moreEl.innerHTML=html;
+}
+
+// ── RENDER CARD ───────────────────────────────────────────
+function renderCard(){
+  const cfg=getCfg(),{done,tot,todXP,totXP,rank,pct,nextRank,level,levelPct,levelXpToNext}=stats();
+  const c=RC[rank]||(rank.startsWith('Monarch')?RC.Monarch:'#9CA3AF'),dp=tot?Math.round((done/tot)*100):0;
+  document.getElementById('h-name').textContent=cfg.hunterName||'HUNTER';
+  document.getElementById('h-sub').textContent=cfg.subtitle||'';
+  document.getElementById('rd').textContent=rank;document.getElementById('rd').style.color=c;
+  document.getElementById('lvd').textContent='Lv. '+level;
+  document.getElementById('lvb').style.width=levelPct+'%';
+  document.getElementById('lvbw').title=levelXpToNext+' XP to Lv. '+(level+1);
+  document.getElementById('txl').textContent=totXP+' XP total';
+  document.getElementById('nr').textContent=nextRank;
+  document.getElementById('rp').textContent=pct+'%';
+  document.getElementById('rb').style.cssText='width:'+Math.min(pct,100)+'%;background:'+c;
+  document.getElementById('dxl').textContent='Today: '+todXP+' XP';
+  document.getElementById('dpl').textContent=done+' / '+tot+' quests';
+  document.getElementById('db2').style.width=dp+'%';
+  document.getElementById('s1').textContent=done+'/'+tot;
+  document.getElementById('s2').textContent=liveStreak();
+  document.getElementById('s3').textContent=todXP;
+}
+
+// ── RENDER BOARD ─────────────────────────────────────────
+function renderBoard(){
+  const subjs=getSubjs(),d=getDD(),board=document.getElementById('board');
+  board.innerHTML='';
+  const active=subjs.filter(s=>s.active);
+  if(!active.length){
+    board.innerHTML='<div style="color:var(--text3);font-size:13px;padding:1rem 0 .5rem">No active subjects. Go to <strong style="color:var(--text2)">Settings → Subjects</strong> to add or activate some.<br><br><span style="font-size:11px">You can add anything: Workout, Code, Reading, Study — name them whatever you want.</span></div>';
+    return;
+  }
+  active.forEach(s=>{
+    const rec=s.tasks||[];
+    const ext=(d.extras||[]).filter(e=>e.subjectId===s.id);
+    const tot=rec.length+ext.length;
+    const donCnt=rec.filter((_,i)=>d.checks[s.id+':r:'+i]).length
+                +ext.filter((_,i)=>d.checks[s.id+':e:'+i]).length;
+    const all=tot>0&&donCnt===tot;
+    const showDone=shownDone.has(s.id);
+
+    const wrap=mk('div','sc');wrap.style.borderLeft='3px solid '+s.color;
+
+    const hdr=mk('div','sch');
+    hdr.innerHTML=`<div class="scn"><div class="dot" style="background:${s.color}"></div>${x(s.name)}
+      ${s.priority==='CRITICAL'?'<span class="bc">Critical</span>':''}
+      ${s.priority==='KEEP_ALIVE'?'<span class="bk">Keep alive</span>':''}</div>
+      <span class="scc" style="color:${all?s.color:'var(--text3)'}">${donCnt}/${tot}${all?' ✓':''}</span>`;
+    wrap.appendChild(hdr);
+
+    if(s.warning){const w=mk('div','wb');w.textContent='⚠ '+s.warning;wrap.appendChild(w);}
+
+    const allT=[
+      ...rec.map((t,i)=>({text:t.text,type:'r',idx:i,done:!!d.checks[s.id+':r:'+i]})),
+      ...ext.map((t,i)=>({text:t.text,type:'e',idx:i,done:!!d.checks[s.id+':e:'+i],extra:true}))
+    ];
+    const undone=allT.filter(t=>!t.done);
+    const doneL=allT.filter(t=>t.done);
+
+    if(allT.length===0){const es=mk('div','es');es.textContent='No tasks yet — add yours below ↓';wrap.appendChild(es);}
+
+    undone.forEach(t=>wrap.appendChild(makeRow(s,t.idx,t.type,t.text,false,t.extra)));
+
+    if(doneL.length>0){
+      const link=mk('button','sd-link');
+      link.textContent=(showDone?'▲ Hide':'▼ Show')+' '+doneL.length+' completed';
+      link.onclick=()=>{shownDone.has(s.id)?shownDone.delete(s.id):shownDone.add(s.id);renderBoard();};
+      wrap.appendChild(link);
+      if(showDone) doneL.forEach(t=>wrap.appendChild(makeRow(s,t.idx,t.type,t.text,true,t.extra)));
+    }
+
+    wrap.appendChild(makeAddArea(s.id));
+    board.appendChild(wrap);
+  });
+}
+
+function makeRow(s,idx,type,text,done,isExtra){
+  const cfg=getCfg();
+  const row=mk('div','tr');
+  const cb=mk('div','cb'+(done?' on':''));cb.innerHTML=done?CHK:'';
+  cb.onclick=()=>toggleTask(s.id,idx,type,row);
+  const tt=mk('span','tt'+(done?' done':''));
+  tt.innerHTML=x(text)+'<span class="txp">+'+(cfg.xpPerTask||25)+' XP</span>'+(isExtra?'<span class="ttag">[today]</span>':'');
+  tt.onclick=()=>toggleTask(s.id,idx,type,row);
+  const db=mk('button','db');db.innerHTML='&times;';
+  db.title=type==='r'?'Remove from base recurring list permanently':'Remove (today only)';
+  db.onclick=e=>{e.stopPropagation();delTask(s.id,idx,type);};
+  row.appendChild(cb);row.appendChild(tt);row.appendChild(db);
+  return row;
+}
+
+function makeAddArea(sid){
+  const area=mk('div','aa');
+  const tr=mk('div','tr-row');
+  const types=[{k:'today',l:'Today only',c:'st'},{k:'base',l:'Add to base',c:'sb'},{k:'tmr',l:'Queue tomorrow',c:'sm'}];
+  let sel='today';
+  types.forEach(t=>{
+    const b=mk('button','tb'+(t.k==='today'?' st':''));b.textContent=t.l;
+    b.title=t.k==='today'?'Only today':t.k==='base'?'Every day (recurring)':'Tomorrow\'s board';
+    b.onclick=()=>{sel=t.k;tr.querySelectorAll('.tb').forEach(x=>x.className='tb');b.className='tb '+t.c;};
+    tr.appendChild(b);
+  });
+  const ar=mk('div','ar');
+  const inp=mk('input','ai');inp.type='text';inp.placeholder='New task...';inp.maxLength=160;
+  const btn=mk('button','ab');btn.textContent='+ Add';
+  const go=()=>{const v=inp.value.trim();if(!v)return;addTask(sid,v,sel);inp.value='';};
+  btn.onclick=go;inp.onkeydown=e=>{if(e.key==='Enter')go();};
+  ar.appendChild(inp);ar.appendChild(btn);
+  area.appendChild(tr);area.appendChild(ar);return area;
+}
+
+// ── TOMORROW PREVIEW ─────────────────────────────────────
+function renderTmr(){
+  const tmr=getTmr(),wrap=document.getElementById('tq-wrap'),list=document.getElementById('tq-list');
+  if(!tmr.length){wrap.style.display='none';return;}
+  wrap.style.display='block';
+  const subjs=getSubjs();
+  list.innerHTML=tmr.map((t,i)=>{
+    const sn=(subjs.find(s=>s.id===t.subjectId)||{name:t.subjectId}).name;
+    return`<div class="ti"><span><span style="color:var(--text3)">[${x(sn)}]</span> ${x(t.text)}</span>
+      <button style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:15px;padding:0 4px" onclick="delTmr(${i})">&times;</button></div>`;
+  }).join('');
+}
+
+// ── SEALED ───────────────────────────────────────────────
+function renderSealed(){
+  const inactive=getSubjs().filter(s=>!s.active);
+  const wrap=document.getElementById('sealed-wrap');
+  if(!inactive.length){wrap.style.display='none';return;}
+  wrap.style.display='block';
+  document.getElementById('sealed-list').innerHTML=inactive.map(s=>`<span class="spp" style="border-color:${s.color}33;color:${s.color}99">🔒 ${x(s.name)}</span>`).join('');
+}
+
+// ── TASK ACTIONS ─────────────────────────────────────────
+// Keep the Stats tab's charts live-updating as things change elsewhere, instead of only
+// refreshing when you switch into that tab (which was silently making XP/habit changes
+// look like "nothing happened" if you were watching the Stats bars at the time).
+function refreshStatsIfActive(){
+  const panel=document.getElementById('panel-stats');
+  if(panel&&panel.classList.contains('active'))renderStats();
+}
+
+function toggleTask(sid,idx,type,rowEl){
+  const d=getDD();const k=sid+':'+type+':'+idx;
+  const nowDone=!d.checks[k];d.checks[k]=nowDone;setDD(d);
+  renderCard();refreshStatsIfActive(); // instant numeric feedback, regardless of the row's own animation
+  if(nowDone&&rowEl){rowEl.classList.add('vanishing');setTimeout(()=>{renderBoard();},440);}
+  else{renderBoard();}
+}
+
+let shownBadDone=false;
+function toggleBadHabit(id,rowEl){
+  const checked=getBadChecks();
+  const i=checked.indexOf(id);
+  const nowOn=i<0;
+  if(nowOn)checked.push(id);else checked.splice(i,1);
+  setBadChecks(checked);
+  renderCard();refreshStatsIfActive(); // instant numeric feedback
+  if(nowOn&&rowEl){rowEl.classList.add('vanishing');setTimeout(()=>{renderBadHabits();},440);}
+  else{renderBadHabits();}
+}
+
+function renderBadHabits(){
+  const wrap=document.getElementById('bad-wrap');
+  const el=document.getElementById('bad-list');
+  const addEl=document.getElementById('bad-add');
+  const countEl=document.getElementById('bad-count');
+  if(!wrap||!el)return;
+  const habits=getBadHabits();
+  const checked=getBadChecks();
+  const untouched=habits.filter(h=>!checked.includes(h.id));
+  const triggered=habits.filter(h=>checked.includes(h.id));
+
+  if(countEl)countEl.textContent=habits.length?triggered.length+'/'+habits.length:'';
+
+  const row=h=>`<div class="tr" style="cursor:pointer" onclick="toggleBadHabit('${h.id}',this)">
+      <div class="cb${checked.includes(h.id)?' on':''}" style="${checked.includes(h.id)?'background:var(--incomplete);border-color:var(--incomplete)':''}">${checked.includes(h.id)?CHK:''}</div>
+      <span class="tt">${x(h.icon||'⚠️')} ${x(h.name)}${checked.includes(h.id)?'<span class="txp" style="color:var(--incomplete)">-'+((getCfg().xpPerBadHabit)??15)+' XP</span>':''}</span>
+    </div>`;
+
+  let html=untouched.map(row).join('');
+  if(triggered.length){
+    html+=`<button class="sd-link" onclick="shownBadDone=!shownBadDone;renderBadHabits();">${shownBadDone?'▲ Hide':'▼ Show'} ${triggered.length} triggered</button>`;
+    if(shownBadDone)html+=triggered.map(row).join('');
+  }
+  if(!habits.length)html='<div style="color:var(--text3);font-size:12px;padding:.5rem 0">Nothing yet — add one below.</div>';
+  el.innerHTML=html;
+
+  if(addEl){
+    addEl.innerHTML=`<div style="display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+      <input type="text" class="icon-inp" id="bh-quick-icon" placeholder="⚠️" maxlength="2" style="width:36px;font-size:15px">
+      <input type="text" class="inf" id="bh-quick-name" placeholder="Add a bad habit" maxlength="40" style="margin-bottom:0;flex:1;font-size:12px">
+    </div>
+    <button class="btn ba" style="margin-top:6px;width:100%" onclick="quickAddBadHabit()">+ Add</button>`;
+    document.getElementById('bh-quick-name').onkeydown=e=>{if(e.key==='Enter')quickAddBadHabit();};
+  }
+}
+
+function quickAddBadHabit(){
+  const iconInp=document.getElementById('bh-quick-icon'),nameInp=document.getElementById('bh-quick-name');
+  const icon=iconInp.value.trim()||'⚠️',name=nameInp.value.trim();
+  if(!name){nameInp.focus();return;}
+  const list=getBadHabits();
+  list.push({id:'bh_'+Date.now(),name,icon,color:COLORS[5]});
+  setBadHabits(list);
+  iconInp.value='';nameInp.value='';
+  renderBadHabits();renderBadHabitSettings();
+}
+
+
+function addTask(sid,text,type){
+  if(type==='base'){const s=getSubjs();const f=s.find(s=>s.id===sid);if(f){f.tasks.push({text});setSubjs(s);}}
+  else if(type==='today'){const d=getDD();d.extras=[...(d.extras||[]),{subjectId:sid,text}];setDD(d);}
+  else if(type==='tmr'){const t=getTmr();t.push({subjectId:sid,text});setTmr(t);renderTmr();return;}
+  renderBoard();renderCard();refreshStatsIfActive();
+}
+
+function delTask(sid,idx,type){
+  if(type==='r'){
+    const s=getSubjs();const f=s.find(s=>s.id===sid);if(!f)return;
+    f.tasks.splice(idx,1);setSubjs(s);
+    const d=getDD();const nc={};
+    Object.keys(d.checks).forEach(k=>{
+      const[a,t,i2]=[...k.split(':')];
+      if(a!==sid||t!=='r'){nc[k]=d.checks[k];return;}
+      const ki=parseInt(i2);
+      if(ki<idx)nc[k]=d.checks[k];else if(ki>idx)nc[sid+':r:'+(ki-1)]=d.checks[k];
+    });
+    d.checks=nc;setDD(d);
+  }else if(type==='e'){
+    const d=getDD();const allE=d.extras||[];
+    // Collect this subject's extras in order, with their old check-state, then drop idx and re-key sequentially.
+    const subjExtras=allE.map((e,i)=>({e,i})).filter(({e})=>e.subjectId===sid);
+    const keptChecks={};let ni=0;
+    subjExtras.forEach(({e},localIdx)=>{
+      if(localIdx===idx)return;
+      if(d.checks[sid+':e:'+localIdx])keptChecks[sid+':e:'+ni]=true;
+      ni++;
+    });
+    const nc={};
+    Object.keys(d.checks).forEach(k=>{if(!k.startsWith(sid+':e:'))nc[k]=d.checks[k];});
+    Object.assign(nc,keptChecks);
+    d.extras=allE.filter((e,localIdxAll)=>{
+      const pos=subjExtras.findIndex(se=>se.i===localIdxAll);
+      return !(e.subjectId===sid&&pos===idx);
+    });
+    d.checks=nc;setDD(d);
+  }
+  renderBoard();renderCard();refreshStatsIfActive();
+}
+
+function delTmr(i){const t=getTmr();t.splice(i,1);setTmr(t);renderTmr();}
+
+// ── DAY ACTIONS ───────────────────────────────────────────
+function addNoteEntry(){
+  const ta=document.getElementById('nta');
+  const text=ta.value.trim();
+  if(!text)return;
+  const log=getNoteLog();
+  log.push({t:new Date().toTimeString().slice(0,5),text});
+  setNoteLog(log);
+  ta.value='';
+}
+
+// date defaults to TODAY; also keeps a saved history record's snapshot in sync if that day was already closed
+function delNoteEntry(i,date){
+  const d0=date||TODAY;
+  const log=getNoteLog(d0);
+  log.splice(i,1);
+  setNoteLog(log,d0);
+  const hist=getHist();const hi=hist.findIndex(h=>h.date===d0);
+  if(hi>=0){hist[hi].notesLog=log;hist[hi].notes=log.map(n=>n.text).join('\n');_s('hs:hist',hist);}
+  renderHistory();
+}
+
+// Unified view of every day that has notes, merging live (unsaved) logs, saved history snapshots,
+// and legacy single-blob notes. Sorted most-recent first.
+function getAllNotesData(){
+  const dates=new Set();
+  try{Object.keys(localStorage).forEach(k=>{if(k.startsWith('hs:nlog:'))dates.add(k.slice(8));});}catch{}
+  const hist=getHist();
+  hist.forEach(h=>{if(h.notes||((h.notesLog||[]).length))dates.add(h.date);});
+  const rows=Array.from(dates).map(date=>{
+    let entries=getNoteLog(date);
+    if(!entries.length){
+      const h=hist.find(hh=>hh.date===date);
+      if(h&&h.notesLog&&h.notesLog.length)entries=h.notesLog;
+      else if(h&&h.notes)entries=[{t:'',text:h.notes}];
+    }
+    return{date,entries};
+  }).filter(r=>r.entries.length);
+  rows.sort((a,b)=>b.date.localeCompare(a.date));
+  return rows;
+}
+
+// Per-subject done/total for today, snapshotting each subject's name/color at save time
+// so historical breakdowns stay accurate even if a subject is later renamed, recolored, or deleted.
+function subjectBreakdownToday(){
+  const subjs=getSubjs(),d=getDD();
+  return subjs.filter(s=>s.active).map(s=>{
+    let done=0,total=0;
+    (s.tasks||[]).forEach((_,i)=>{total++;if(d.checks[s.id+':r:'+i])done++;});
+    (d.extras||[]).filter(e=>e.subjectId===s.id).forEach((_,i)=>{total++;if(d.checks[s.id+':e:'+i])done++;});
+    return{id:s.id,name:s.name,color:s.color,done,total};
+  }).filter(s=>s.total>0);
+}
+
+// Which bad habits were marked today, snapshotting name/icon/color so history stays accurate later.
+function badHabitsToday(){
+  const all=getBadHabits(),checked=getBadChecks();
+  return all.filter(h=>checked.includes(h.id)).map(h=>({id:h.id,name:h.name,icon:h.icon,color:h.color}));
+}
+
+function saveDay(){
+  const pending=document.getElementById('nta').value.trim();
+  if(pending)addNoteEntry();
+  const log=getNoteLog();
+  const notes=log.map(n=>n.text).join('\n');
+  const{done,tot,rawTodXP}=stats();
+  const bySubject=subjectBreakdownToday();
+  const badHabits=badHabitsToday();
+  const hist=getHist();const i=hist.findIndex(h=>h.date===TODAY);
+  const e={date:TODAY,done,total:tot,xp:rawTodXP,notes,notesLog:log,bySubject,badHabits,badCount:badHabits.length};
+  if(i>=0)hist[i]=e;else hist.push(e);_s('hs:hist',hist);
+  // Only days with real activity extend the streak — a 0-done day shouldn't count, to stay
+  // consistent with autoCommitPastDays (which already enforces this for auto-recovered days).
+  if(done>0){
+    const yest=dayBefore(TODAY);
+    const last=getLast();
+    if(last===yest)_s('hs:streak',getStreak()+1);else if(last!==TODAY)_s('hs:streak',1);
+    _ss('hs:last',TODAY);
+  }
+  const btn=document.getElementById('sbtn');
+  btn.textContent='✓ Day saved';btn.className='btn bp ok';
+  setTimeout(()=>{btn.textContent='Save & close day';btn.className='btn bp';},2500);
+  renderCard();refreshStatsIfActive();
+}
+
+function markAllDone(){
+  if(!confirm('Mark every remaining task as complete and save the day? This cannot be undone.'))return;
+  const s=getSubjs(),d=getDD();
+  s.filter(s=>s.active).forEach(s=>{
+    (s.tasks||[]).forEach((_,i)=>{d.checks[s.id+':r:'+i]=true;});
+    (d.extras||[]).filter(e=>e.subjectId===s.id).forEach((_,i)=>{d.checks[s.id+':e:'+i]=true;});
+  });
+  setDD(d);renderBoard();renderCard();saveDay();
+}
+
+// ── SETTINGS ─────────────────────────────────────────────
+function loadCfgForm(){
+  const c=getCfg();
+  document.getElementById('ci-name').value=c.hunterName||'';
+  document.getElementById('ci-sub2').value=c.subtitle||'';
+  document.getElementById('ci-xptask').value=c.xpPerTask??25;
+  document.getElementById('ci-xpbad').value=c.xpPerBadHabit??15;
+}
+
+function saveCfg(){
+  const c=getCfg();
+  c.hunterName=document.getElementById('ci-name').value.trim()||c.hunterName;
+  c.subtitle=document.getElementById('ci-sub2').value.trim()||c.subtitle;
+  const xt=parseInt(document.getElementById('ci-xptask').value,10);
+  const xb=parseInt(document.getElementById('ci-xpbad').value,10);
+  if(!isNaN(xt)&&xt>0)c.xpPerTask=xt;
+  if(!isNaN(xb)&&xb>=0)c.xpPerBadHabit=xb;
+  setCfg(c);renderCard();renderBadHabits();alert('Saved.');
+}
+
+function renderSList(){
+  const subjs=getSubjs(),list=document.getElementById('slist');list.innerHTML='';
+  subjs.forEach(s=>{
+    const wrap=mk('div');
+    const row=mk('div','sjr');
+    row.innerHTML=`<div class="dot" style="background:${s.color};width:10px;height:10px"></div>
+      <span class="sjn" style="color:${s.active?'var(--text)':'var(--text3)'}">${x(s.name)}</span>
+      <span class="sjc">${(s.tasks||[]).length} base tasks</span>`;
+    const tg=mk('button','tgl '+(s.active?'on':'off'));tg.title=s.active?'Seal (deactivate)':'Activate';tg.onclick=()=>toggleActive(s.id);
+    const eb=mk('button','ib');eb.textContent='Edit';eb.onclick=()=>startEdit(s.id);
+    const db=mk('button','ib d');db.textContent='Del';db.onclick=()=>delSubj(s.id);
+    row.appendChild(tg);row.appendChild(eb);row.appendChild(db);wrap.appendChild(row);
+    if(editId===s.id){
+      if(!editClr)editClr=s.color;
+      const ep=mk('div','ep');
+      const sw=COLORS.map(c=>`<div class="sw${c===editClr?' sel':''}" style="background:${c}" onclick="pickEC(this,'${c}')"></div>`).join('');
+      ep.innerHTML=`<label class="il">Name</label><input type="text" class="inf" id="ei-n" value="${x(s.name)}" maxlength="40">
+        <label class="il">Color</label><div class="sww" id="ei-sw">${sw}</div>
+        <label class="il">Priority</label>
+        <select class="slf" id="ei-p">
+          <option value="HIGH"${s.priority==='HIGH'?' selected':''}>High</option>
+          <option value="CRITICAL"${s.priority==='CRITICAL'?' selected':''}>Critical</option>
+          <option value="KEEP_ALIVE"${s.priority==='KEEP_ALIVE'?' selected':''}>Keep alive</option>
+          <option value="NORMAL"${s.priority==='NORMAL'?' selected':''}>Normal</option>
+        </select>
+        <label class="il">Warning message (optional)</label>
+        <input type="text" class="inf" id="ei-w" value="${x(s.warning||'')}" placeholder="Shown on the card" maxlength="120">
+        <div style="display:flex;gap:8px"><button class="btn bp" onclick="saveEdit('${s.id}')">Save</button><button class="ib" onclick="cancelEdit()">Cancel</button></div>`;
+      wrap.appendChild(ep);
+    }
+    list.appendChild(wrap);
+  });
+  const nsw=document.getElementById('ns-sw');
+  if(nsw)nsw.innerHTML=COLORS.map(c=>`<div class="sw${c===nsColor?' sel':''}" style="background:${c}" onclick="pickNC(this,'${c}')"></div>`).join('');
+}
+
+function toggleActive(id){const s=getSubjs();const f=s.find(s=>s.id===id);if(f){f.active=!f.active;setSubjs(s);}renderSList();renderBoard();renderCard();renderSealed();}
+function startEdit(id){editId=id;editClr=null;renderSList();}
+function cancelEdit(){editId=null;editClr=null;renderSList();}
+function pickEC(el,c){editClr=c;document.getElementById('ei-sw').querySelectorAll('.sw').forEach(s=>s.classList.remove('sel'));el.classList.add('sel');}
+function pickNC(el,c){nsColor=c;document.getElementById('ns-sw').querySelectorAll('.sw').forEach(s=>s.classList.remove('sel'));el.classList.add('sel');}
+
+function saveEdit(id){
+  const s=getSubjs();const f=s.find(s=>s.id===id);if(!f)return;
+  const n=document.getElementById('ei-n')?.value.trim();if(n)f.name=n;
+  f.color=editClr||f.color;f.priority=document.getElementById('ei-p')?.value||f.priority;
+  const w=document.getElementById('ei-w')?.value.trim();f.warning=w||undefined;
+  setSubjs(s);editId=null;editClr=null;
+  renderSList();renderBoard();renderCard();renderSealed();
+}
+
+function delSubj(id){
+  if(!confirm('Delete this subject? Base tasks go too. XP and history are safe.'))return;
+  setSubjs(getSubjs().filter(s=>s.id!==id));if(editId===id){editId=null;editClr=null;}
+  renderSList();renderBoard();renderCard();renderSealed();
+}
+
+function addSubj(){
+  const name=document.getElementById('ns-n').value.trim();if(!name){alert('Enter a name.');return;}
+  const subjs=getSubjs();
+  subjs.push({id:'s'+Date.now(),name,color:nsColor,priority:document.getElementById('ns-p').value,active:true,warning:document.getElementById('ns-w').value.trim()||undefined,tasks:[]});
+  setSubjs(subjs);document.getElementById('ns-n').value='';document.getElementById('ns-w').value='';
+  renderSList();renderBoard();renderCard();renderSealed();
+}
+
+// ── HISTORY ──────────────────────────────────────────────
+function historyRowHtml(h){
+  const pct=h.total?Math.round((h.done/h.total)*100):0;
+  const d=new Date(h.date+'T12:00:00');
+  const lab=d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  const trackStyle=pct<100?' style="background:var(--incomplete-track)"':'';
+  const liveTag=h.live?' <span style="color:var(--purple);font-size:9px;letter-spacing:.06em">· LIVE</span>':'';
+  const recoveredTag=h.autoRecovered?' <span style="color:var(--amber);font-size:9px;letter-spacing:.06em" title="This day rolled over before you clicked Save & close day — recovered automatically from your raw activity.">· AUTO-RECOVERED</span>':'';
+  return`<div class="hr"><span style="color:var(--text2);font-family:var(--mono);font-size:11px;min-width:90px">${lab}${liveTag}${recoveredTag}</span><div class="hbw"${trackStyle}><div class="hbr" style="width:${pct}%"></div></div><span style="color:var(--text3);font-size:11px;font-family:var(--mono);min-width:82px;text-align:right">${h.done}/${h.total} · ${h.xp}XP</span></div>`;
+}
+function togglePrevHistory(){historyPrevOpen=!historyPrevOpen;renderHistory();}
+
+function renderHistory(){
+  const el=document.getElementById('hl');
+  const{done,tot,todXP}=stats();
+  const todayRow={date:TODAY,done,total:tot,xp:todXP,live:true};
+  const prevDays=getHist().filter(h=>h.date!==TODAY).slice().reverse();
+
+  let html=historyRowHtml(todayRow);
+  if(prevDays.length){
+    html+=`<button class="sd-link" onclick="togglePrevHistory()">${historyPrevOpen?'▲ Hide':'▼ Show'} ${prevDays.length} previous day${prevDays.length===1?'':'s'}</button>`;
+    if(historyPrevOpen)html+=prevDays.map(historyRowHtml).join('');
+  }
+  el.innerHTML=html;
+  const rows=getAllNotesData();
+
+  const sum=document.getElementById('hn-summary');
+  if(!rows.length){sum.innerHTML='<div style="color:var(--text3);font-size:13px;padding:.75rem 0">No notes yet.</div>';}
+  else sum.innerHTML=rows.map(r=>{
+    const d=new Date(r.date+'T12:00:00');
+    const lab=d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    return`<div class="hr" style="cursor:pointer" onclick="jumpToNoteDay('${r.date}')" title="Jump to this day"><span style="color:var(--purple);font-family:var(--mono);font-size:11px;text-decoration:underline;text-underline-offset:2px">${lab}</span><span style="color:var(--text3);font-size:11px">${r.entries.length} entr${r.entries.length===1?'y':'ies'}</span></div>`;
+  }).join('');
+
+  const det=document.getElementById('hn-detail');
+  if(!rows.length){det.innerHTML='<div style="color:var(--text3);font-size:13px;padding:.75rem 0">No notes yet.</div>';}
+  else{
+    const allOpen=rows.every(r=>notesExpanded.has(r.date));
+    const toggleAll=`<button class="sd-link" style="border-top:none;padding:0 0 10px" onclick="toggleAllNotes(${allOpen})">${allOpen?'▲ Collapse all':'▼ Expand all'}</button>`;
+    det.innerHTML=toggleAll+rows.map(r=>{
+      const d=new Date(r.date+'T12:00:00');
+      const lab=d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+      const isOpen=notesExpanded.has(r.date);
+      const body=isOpen?r.entries.map((n,i)=>`<div style="display:flex;justify-content:space-between;gap:8px;padding:4px 0">
+        <span style="font-size:13px;color:var(--text2);line-height:1.6;flex:1;min-width:0;overflow-wrap:anywhere;word-break:break-word;white-space:pre-wrap">${n.t?`<span style="color:var(--text3);font-family:var(--mono);font-size:11px;margin-right:6px">${x(n.t)}</span>`:''}${x(n.text)}</span>
+        ${r.date===TODAY?`<button style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;flex-shrink:0" onclick="delNoteEntry(${i},'${r.date}')">&times;</button>`:''}</div>`).join('')
+        :'';
+      return`<div id="nd-${r.date}" style="padding:10px 0;border-bottom:1px solid var(--border)">
+        <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleNoteDay('${r.date}')">
+          <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3)">${lab} <span style="opacity:.7">· ${r.entries.length} entr${r.entries.length===1?'y':'ies'}</span></div>
+          <button style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:11px;padding:2px 4px" onclick="event.stopPropagation();toggleNoteDay('${r.date}')">${isOpen?'▲':'▼'}</button>
+        </div>
+        ${isOpen?`<div style="margin-top:8px">${body}</div>`:''}
+      </div>`;
+    }).join('');
+  }
+}
+
+function toggleNoteDay(date){
+  if(notesExpanded.has(date))notesExpanded.delete(date);else notesExpanded.add(date);
+  renderHistory();
+}
+function toggleAllNotes(currentlyAllOpen){
+  if(currentlyAllOpen)notesExpanded.clear();
+  else getAllNotesData().forEach(r=>notesExpanded.add(r.date));
+  renderHistory();
+}
+function jumpToNoteDay(date){
+  notesExpanded.add(date);
+  renderHistory();
+  setTimeout(()=>{
+    const el=document.getElementById('nd-'+date);
+    if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+  },50);
+}
+
+// ── UI ────────────────────────────────────────────────────
+function switchTab(btn,name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');document.getElementById('panel-'+name).classList.add('active');
+  if(name==='history')renderHistory();
+  if(name==='stats')renderStats();
+  if(name==='settings'){loadCfgForm();renderSList();renderDeadlines();renderBadHabitSettings();}
+  if(name==='dreams')renderDreams();
+}
+const mk=(t,c)=>{const e=document.createElement(t);if(c)e.className=c;return e;};
+const x=s=>s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):'';
+
+// ── DREAMS ────────────────────────────────────────────────
+// Ships empty — add your own dreams, goals, and quotes from the Dreams tab.
+const DEFAULT_DREAMS=[];
+const DEFAULT_GOALS=[];
+const DEFAULT_QUOTES=[];
+
+const getDreams=()=>_g('hs:dreams',JSON.parse(JSON.stringify(DEFAULT_DREAMS)));
+const setDreams=v=>_s('hs:dreams',v);
+const getGoals=()=>_g('hs:goals',JSON.parse(JSON.stringify(DEFAULT_GOALS)));
+const setGoals=v=>_s('hs:goals',v);
+const getQuotes=()=>_g('hs:quotes',JSON.parse(JSON.stringify(DEFAULT_QUOTES)));
+const setQuotes=v=>_s('hs:quotes',v);
+
+function renderDreams(){
+  renderDreamSection('dreams-list','What this is all for',getDreams,setDreams,'dreams');
+  renderDreamSection('goals-list','Active goals',getGoals,setGoals,'goals');
+  renderQuotes();
+}
+
+function renderDreamSection(elId,title,getter,setter,key){
+  const el=document.getElementById(elId);if(!el)return;
+  const items=getter();
+  const card=mk('div','card');
+
+  // Title
+  const lbl=mk('div','lbl');lbl.textContent=title;card.appendChild(lbl);
+
+  // Items
+  items.forEach((item,i)=>{
+    const row=mk('div','di');
+    row.innerHTML=`<div style="font-size:18px;flex-shrink:0;margin-top:1px">${x(item.icon)}</div>
+      <div style="flex:1;padding-right:1.5rem;min-width:0;overflow-wrap:anywhere;word-break:break-word">
+        <div style="font-weight:500;color:var(--text);margin-bottom:2px">${x(item.title)}</div>
+        <div style="font-size:12px;color:var(--text3)">${x(item.desc)}</div>
+      </div>`;
+    const del=mk('button','di-del');del.innerHTML='&times;';del.title='Delete';
+    del.onclick=()=>{
+      if(!confirm('Remove "'+item.title+'"?'))return;
+      const updated=getter().filter((_,j)=>j!==i);
+      setter(updated);renderDreams();
+    };
+    row.appendChild(del);
+    card.appendChild(row);
+  });
+
+  // Add form
+  const addWrap=mk('div','dream-add');
+  const addLbl=mk('div','lbl');addLbl.textContent='Add new';addWrap.appendChild(addLbl);
+
+  const iconRow=mk('div','dream-inp-row');
+  const iconInp=mk('input','icon-inp');iconInp.type='text';iconInp.placeholder='🌟';iconInp.maxLength=2;
+  const titleInp=mk('input','inf');titleInp.type='text';titleInp.placeholder='Title';titleInp.maxLength=80;titleInp.style.cssText='margin-bottom:0;flex:1';
+  iconRow.appendChild(iconInp);iconRow.appendChild(titleInp);addWrap.appendChild(iconRow);
+
+  const descInp=mk('input','inf');descInp.type='text';descInp.placeholder='Short description';descInp.maxLength=200;
+  addWrap.appendChild(descInp);
+
+  const addBtn=mk('button','btn bp');addBtn.textContent='+ Add';
+  addBtn.onclick=()=>{
+    const icon=iconInp.value.trim()||'⭐';
+    const title2=titleInp.value.trim();
+    const desc=descInp.value.trim();
+    if(!title2){titleInp.focus();return;}
+    const updated=getter();
+    updated.push({id:key+'_'+Date.now(),icon,title:title2,desc});
+    setter(updated);
+    iconInp.value='';titleInp.value='';descInp.value='';
+    renderDreams();
+  };
+  // Enter on desc triggers add
+  descInp.onkeydown=e=>{if(e.key==='Enter')addBtn.click();};
+  addWrap.appendChild(addBtn);
+  card.appendChild(addWrap);
+
+  el.innerHTML='';el.appendChild(card);
+}
+
+function renderQuotes(){
+  const el=document.getElementById('quotes-list');if(!el)return;
+  const items=getQuotes();
+  const card=mk('div','card');
+
+  const lbl=mk('div','lbl');lbl.textContent='Motivational quotes';card.appendChild(lbl);
+
+  items.forEach((item,i)=>{
+    const row=mk('div','di');
+    row.innerHTML=`<div style="font-size:18px;flex-shrink:0;margin-top:1px">${x(item.icon)}</div>
+      <div style="flex:1;padding-right:1.5rem;min-width:0;overflow-wrap:anywhere;word-break:break-word">
+        <div style="font-weight:500;color:var(--text);margin-bottom:2px;font-style:italic">"${x(item.quote)}"</div>
+        ${item.author?`<div style="font-size:12px;color:var(--text3)">— ${x(item.author)}</div>`:''}
+      </div>`;
+    const del=mk('button','di-del');del.innerHTML='&times;';del.title='Delete';
+    del.onclick=()=>{
+      if(!confirm('Remove this quote?'))return;
+      const updated=getQuotes().filter((_,j)=>j!==i);
+      setQuotes(updated);renderQuotes();
+    };
+    row.appendChild(del);
+    card.appendChild(row);
+  });
+
+  const addWrap=mk('div','dream-add');
+  const addLbl=mk('div','lbl');addLbl.textContent='Add new';addWrap.appendChild(addLbl);
+
+  const iconRow=mk('div','dream-inp-row');
+  const iconInp=mk('input','icon-inp');iconInp.type='text';iconInp.placeholder='💬';iconInp.maxLength=2;
+  const quoteInp=mk('input','inf');quoteInp.type='text';quoteInp.placeholder='Quote';quoteInp.maxLength=220;quoteInp.style.cssText='margin-bottom:0;flex:1';
+  iconRow.appendChild(iconInp);iconRow.appendChild(quoteInp);addWrap.appendChild(iconRow);
+
+  const authorInp=mk('input','inf');authorInp.type='text';authorInp.placeholder='Author (optional)';authorInp.maxLength=80;
+  addWrap.appendChild(authorInp);
+
+  const addBtn=mk('button','btn bp');addBtn.textContent='+ Add';
+  addBtn.onclick=()=>{
+    const icon=iconInp.value.trim()||'💬';
+    const quote=quoteInp.value.trim();
+    const author=authorInp.value.trim();
+    if(!quote){quoteInp.focus();return;}
+    const updated=getQuotes();
+    updated.push({id:'q_'+Date.now(),icon,quote,author});
+    setQuotes(updated);
+    iconInp.value='';quoteInp.value='';authorInp.value='';
+    renderQuotes();
+  };
+  authorInp.onkeydown=e=>{if(e.key==='Enter')addBtn.click();};
+  addWrap.appendChild(addBtn);
+  card.appendChild(addWrap);
+
+  el.innerHTML='';el.appendChild(card);
+}
+
+// ── DEADLINES ────────────────────────────────────────────
+let deadlinesPassedOpen=false;
+function toggleDeadlinesPassed(){deadlinesPassedOpen=!deadlinesPassedOpen;renderDeadlines();}
+
+function renderDeadlines(){
+  const el=document.getElementById('deadlines-list');if(!el)return;
+  const all=getDeadlines();
+  const upcoming=all.filter(d=>d.date>=TODAY).sort((a,b)=>a.date.localeCompare(b.date));
+  const passed=all.filter(d=>d.date<TODAY).sort((a,b)=>b.date.localeCompare(a.date));
+
+  const wrap=mk('div');
+
+  if(!upcoming.length&&!passed.length){
+    const empty=mk('div');
+    empty.style.cssText='color:var(--text3);font-size:13px;padding:.5rem 0 1rem';
+    empty.textContent='No deadlines yet — add one below.';
+    wrap.appendChild(empty);
+  }
+
+  upcoming.forEach(dl=>{
+    const row=mk('div','di');
+    const dlab=new Date(dl.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    row.innerHTML=`<div style="font-size:18px;flex-shrink:0;margin-top:1px">${x(dl.icon||'⏳')}</div>
+      <div style="flex:1;padding-right:1.5rem;min-width:0;overflow-wrap:anywhere;word-break:break-word">
+        <div style="font-weight:500;color:var(--text);margin-bottom:2px">${x(dl.label)}${dl.color?` <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${dl.color};margin-left:2px"></span>`:''}</div>
+        <div style="font-size:12px;color:var(--text3)">${dlab}${dl.subtext?' · '+x(dl.subtext):''}</div>
+      </div>`;
+    const del=mk('button','di-del');del.innerHTML='&times;';del.title='Delete';
+    del.onclick=()=>{
+      if(!confirm('Remove "'+dl.label+'"?'))return;
+      setDeadlines(getDeadlines().filter(d=>d.id!==dl.id));
+      renderDeadlines();renderCD();
+    };
+    row.appendChild(del);
+    wrap.appendChild(row);
+  });
+
+  if(passed.length){
+    const toggle=mk('button','sd-link');
+    toggle.textContent=(deadlinesPassedOpen?'▲ Hide':'▼ Show')+' '+passed.length+' passed';
+    toggle.onclick=toggleDeadlinesPassed;
+    wrap.appendChild(toggle);
+    if(deadlinesPassedOpen){
+      passed.forEach(dl=>{
+        const row=mk('div','di');
+        row.style.opacity='.55';
+        const dlab=new Date(dl.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+        row.innerHTML=`<div style="font-size:18px;flex-shrink:0;margin-top:1px">${x(dl.icon||'⏳')}</div>
+          <div style="flex:1;padding-right:1.5rem;min-width:0;overflow-wrap:anywhere;word-break:break-word">
+            <div style="font-weight:500;color:var(--text);margin-bottom:2px">${x(dl.label)}</div>
+            <div style="font-size:12px;color:var(--text3)">${dlab} · Passed${dl.subtext?' · '+x(dl.subtext):''}</div>
+          </div>`;
+        const del=mk('button','di-del');del.innerHTML='&times;';del.title='Delete';
+        del.onclick=()=>{
+          if(!confirm('Remove "'+dl.label+'"?'))return;
+          setDeadlines(getDeadlines().filter(d=>d.id!==dl.id));
+          renderDeadlines();
+        };
+        row.appendChild(del);
+        wrap.appendChild(row);
+      });
+    }
+  }
+
+  // Add-new form
+  const addWrap=mk('div','dream-add');
+  const addLbl=mk('div','lbl');addLbl.textContent='Add new';addWrap.appendChild(addLbl);
+
+  const row1=mk('div','dream-inp-row');
+  const iconInp=mk('input','icon-inp');iconInp.type='text';iconInp.placeholder='⏳';iconInp.maxLength=2;
+  const labelInp=mk('input','inf');labelInp.type='text';labelInp.placeholder='e.g. Final Exam';labelInp.maxLength=60;labelInp.style.cssText='margin-bottom:0;flex:1';
+  row1.appendChild(iconInp);row1.appendChild(labelInp);addWrap.appendChild(row1);
+
+  const dateInp=mk('input','inf');dateInp.type='date';addWrap.appendChild(dateInp);
+
+  const subInp=mk('input','inf');subInp.type='text';subInp.placeholder='Subtext (optional)';subInp.maxLength=100;addWrap.appendChild(subInp);
+
+  if(dlColor===null)dlColor=COLORS[0];
+  const swLbl=mk('div','il');swLbl.textContent='Color';addWrap.appendChild(swLbl);
+  const sww=mk('div','sww');
+  sww.innerHTML=COLORS.map(c=>`<div class="sw${c===dlColor?' sel':''}" style="background:${c}" onclick="pickDlColor(this,'${c}')"></div>`).join('');
+  addWrap.appendChild(sww);
+
+  const addBtn=mk('button','btn bp');addBtn.textContent='+ Add deadline';
+  addBtn.onclick=()=>{
+    const icon=iconInp.value.trim()||'⏳';
+    const label=labelInp.value.trim();
+    const date=dateInp.value;
+    const subtext=subInp.value.trim();
+    if(!label){labelInp.focus();return;}
+    if(!date){dateInp.focus();return;}
+    const list=getDeadlines();
+    list.push({id:'dl_'+Date.now(),label,date,subtext,icon,color:dlColor});
+    setDeadlines(list);
+    iconInp.value='';labelInp.value='';dateInp.value='';subInp.value='';
+    renderDeadlines();renderCD();
+  };
+  addWrap.appendChild(addBtn);
+  wrap.appendChild(addWrap);
+
+  el.innerHTML='';el.appendChild(wrap);
+}
+function pickDlColor(el,c){dlColor=c;el.parentElement.querySelectorAll('.sw').forEach(s=>s.classList.remove('sel'));el.classList.add('sel');}
+
+// ── BAD HABITS SETTINGS ──────────────────────────────────
+function renderBadHabitSettings(){
+  const el=document.getElementById('badhabits-list');if(!el)return;
+  const habits=getBadHabits();
+  const wrap=mk('div');
+
+  if(!habits.length){
+    const empty=mk('div');
+    empty.style.cssText='color:var(--text3);font-size:13px;padding:.5rem 0 1rem';
+    empty.textContent='No bad habits tracked yet — add one below.';
+    wrap.appendChild(empty);
+  }
+
+  habits.forEach(h=>{
+    const row=mk('div','di');
+    row.innerHTML=`<div style="font-size:18px;flex-shrink:0;margin-top:1px">${x(h.icon||'⚠️')}</div>
+      <div style="flex:1;padding-right:1.5rem;min-width:0;overflow-wrap:anywhere;word-break:break-word">
+        <div style="font-weight:500;color:var(--text)">${x(h.name)}${h.color?` <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${h.color};margin-left:2px"></span>`:''}</div>
+      </div>`;
+    const del=mk('button','di-del');del.innerHTML='&times;';del.title='Delete';
+    del.onclick=()=>{
+      if(!confirm('Remove "'+h.name+'"? Past history entries that already mention it are kept.'))return;
+      setBadHabits(getBadHabits().filter(x=>x.id!==h.id));
+      const checked=getBadChecks().filter(id=>id!==h.id);setBadChecks(checked);
+      renderBadHabitSettings();renderBadHabits();renderCard();
+    };
+    row.appendChild(del);
+    wrap.appendChild(row);
+  });
+
+  const addWrap=mk('div','dream-add');
+  const addLbl=mk('div','lbl');addLbl.textContent='Add new';addWrap.appendChild(addLbl);
+
+  const row1=mk('div','dream-inp-row');
+  const iconInp=mk('input','icon-inp');iconInp.type='text';iconInp.placeholder='⚠️';iconInp.maxLength=2;
+  const nameInp=mk('input','inf');nameInp.type='text';nameInp.placeholder='e.g. Doomscrolling';nameInp.maxLength=40;nameInp.style.cssText='margin-bottom:0;flex:1';
+  row1.appendChild(iconInp);row1.appendChild(nameInp);addWrap.appendChild(row1);
+
+  if(bhColor===null)bhColor=COLORS[5];
+  const swLbl=mk('div','il');swLbl.textContent='Color';addWrap.appendChild(swLbl);
+  const sww=mk('div','sww');
+  sww.innerHTML=COLORS.map(c=>`<div class="sw${c===bhColor?' sel':''}" style="background:${c}" onclick="pickBhColor(this,'${c}')"></div>`).join('');
+  addWrap.appendChild(sww);
+
+  const addBtn=mk('button','btn bp');addBtn.textContent='+ Add bad habit';
+  addBtn.onclick=()=>{
+    const icon=iconInp.value.trim()||'⚠️';
+    const name=nameInp.value.trim();
+    if(!name){nameInp.focus();return;}
+    const list=getBadHabits();
+    list.push({id:'bh_'+Date.now(),name,icon,color:bhColor});
+    setBadHabits(list);
+    iconInp.value='';nameInp.value='';
+    renderBadHabitSettings();renderBadHabits();
+  };
+  addWrap.appendChild(addBtn);
+  wrap.appendChild(addWrap);
+
+  el.innerHTML='';el.appendChild(wrap);
+}
+function pickBhColor(el,c){bhColor=c;el.parentElement.querySelectorAll('.sw').forEach(s=>s.classList.remove('sel'));el.classList.add('sel');}
+
+// ── STATS TAB ────────────────────────────────────────────
+// All hand-built SVG — no chart library, keeps the app a single offline file.
+
+let totalsPeriod='day';
+function setTotalsPeriod(p){
+  totalsPeriod=p;
+  ['day','week','month','year'].forEach(k=>document.getElementById('tpb-'+k).classList.toggle('sel',k===p));
+  renderTotalsChart();
+}
+
+function renderStats(){
+  renderHeatmap();
+  renderXPChart();
+  renderDailyOutputChart();
+  renderTotalsChart();
+  renderSubjectBreakdown();
+}
+
+// Merge saved history + today's live numbers into one lookup by date.
+function statsDailyMap(){
+  const map={};
+  getHist().forEach(h=>{map[h.date]={done:h.done,total:h.total,xp:h.xp,bySubject:h.bySubject,badCount:h.badCount||0,badHabits:h.badHabits||[]};});
+  const{done,tot,todXP,badCount}=stats();
+  map[TODAY]={done,total:tot,xp:todXP,bySubject:subjectBreakdownToday(),badCount,badHabits:badHabitsToday()};
+  return map;
+}
+
+function renderHeatmap(){
+  const el=document.getElementById('stat-heatmap');if(!el)return;
+  const map=statsDailyMap();
+  // Pure UTC arithmetic throughout — local-noon anchoring only has a ±12h safety margin,
+  // which isn't enough for real timezones beyond that (e.g. UTC+14 / Kiritimati), where
+  // local noon on a date can actually fall on the PREVIOUS UTC calendar day.
+  const today=new Date(TODAY+'T00:00:00Z');
+  const end=new Date(today);
+  const start=new Date(end);start.setUTCDate(start.getUTCDate()-363); // ~52 weeks back
+  start.setUTCDate(start.getUTCDate()-start.getUTCDay()); // snap back to the preceding Sunday
+
+  const vw=(typeof window!=='undefined'&&window.innerWidth)?window.innerWidth:9999;
+  const cell=vw<420?7:vw<820?9:11,gap=vw<420?2:3,step=cell+gap;
+  const weeks=Math.ceil(((end-start)/86400000+1)/7);
+  const w=weeks*step+30,h=7*step+20;
+
+  const purples=['rgba(255,255,255,.05)','rgba(139,92,246,.28)','rgba(139,92,246,.5)','rgba(139,92,246,.72)','#8B5CF6'];
+  const reds=['rgba(185,28,28,.28)','rgba(185,28,28,.45)','rgba(185,28,28,.65)','#B91C1C'];
+
+  let rects='';
+  let monthLabels='';
+  let lastMonth=-1;
+  for(let day=new Date(start);day<=end;day.setUTCDate(day.getUTCDate()+1)){
+    const ds=day.toISOString().split('T')[0];
+    const dow=day.getUTCDay();
+    const weekIdx=Math.floor((day-start)/86400000/7);
+    const cx=30+weekIdx*step,cy=10+dow*step;
+    const rec=map[ds];
+    let fill=purples[0],tip=`${ds}: no data`;
+    if(rec&&(rec.total>0||rec.badCount>0)){
+      const badOutweighs=rec.badCount>0&&rec.badCount>=rec.done;
+      if(badOutweighs){
+        const rl=rec.badCount>=4?3:rec.badCount>=3?2:rec.badCount>=1?1:0;
+        fill=reds[rl];
+        tip=`${ds}: ${rec.badCount} bad habit${rec.badCount===1?'':'s'} outweighed ${rec.done}/${rec.total} done`;
+      }else{
+        const pct=rec.total?rec.done/rec.total:0;
+        const level=pct>=1?4:pct>=.67?3:pct>=.34?2:pct>0?1:0;
+        fill=purples[level];
+        tip=`${ds}: ${rec.done}/${rec.total} done`+(rec.badCount?` · ${rec.badCount} bad habit${rec.badCount===1?'':'s'}`:'');
+      }
+    }
+    rects+=`<rect x="${cx}" y="${cy}" width="${cell}" height="${cell}" rx="2" fill="${fill}"><title>${x(tip)}</title></rect>`;
+    if(dow===0&&day.getUTCMonth()!==lastMonth){
+      lastMonth=day.getUTCMonth();
+      const mlab=day.toLocaleDateString('en-US',{month:'short'});
+      monthLabels+=`<text x="${cx}" y="8" font-size="9" fill="var(--text3)" font-family="var(--mono)">${mlab}</text>`;
+    }
+  }
+  const dayLabels=['','Mon','','Wed','','Fri',''].map((l,i)=>l?`<text x="0" y="${10+i*step+9}" font-size="9" fill="var(--text3)" font-family="var(--mono)">${l}</text>`:'').join('');
+
+  el.innerHTML=`<div style="overflow-x:auto;overflow-y:hidden;max-width:100%;-webkit-overflow-scrolling:touch;touch-action:pan-x" id="heatmap-scroll"><svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" style="min-width:${w}px;display:block">${monthLabels}${dayLabels}${rects}</svg></div>
+    <div style="font-size:10px;color:var(--text3);margin-bottom:6px">Scroll to see earlier weeks →</div>
+    <div style="display:flex;align-items:center;gap:4px;margin-top:8px;font-size:10px;color:var(--text3);flex-wrap:wrap">
+      <span>Less</span>
+      <span style="width:9px;height:9px;border-radius:2px;background:rgba(255,255,255,.05);display:inline-block"></span>
+      <span style="width:9px;height:9px;border-radius:2px;background:rgba(139,92,246,.28);display:inline-block"></span>
+      <span style="width:9px;height:9px;border-radius:2px;background:rgba(139,92,246,.5);display:inline-block"></span>
+      <span style="width:9px;height:9px;border-radius:2px;background:rgba(139,92,246,.72);display:inline-block"></span>
+      <span style="width:9px;height:9px;border-radius:2px;background:#8B5CF6;display:inline-block"></span>
+      <span style="margin-left:4px">More</span>
+      <span style="margin-left:14px;width:9px;height:9px;border-radius:2px;background:#B91C1C;display:inline-block"></span>
+      <span>Bad habits outweighed the day</span>
+    </div>`;
+  // Show the current/most recent week by default — scroll back manually for older history.
+  // Deferred via double rAF: on a real device, scrollWidth can still reflect the OLD/empty
+  // layout in the same tick we just set innerHTML — reading it too early silently no-ops
+  // the scroll. Waiting for the next two paint frames guarantees layout has caught up.
+  const scroller=document.getElementById('heatmap-scroll');
+  if(scroller){
+    const doScroll=()=>{scroller.scrollLeft=scroller.scrollWidth;};
+    if(typeof requestAnimationFrame==='function'){
+      requestAnimationFrame(()=>requestAnimationFrame(doScroll));
+    }else{
+      setTimeout(doScroll,50);
+    }
+    setTimeout(doScroll,150); // extra safety net in case rAF still fires too early on some devices
+  }
+}
+
+function renderXPChart(){
+  const el=document.getElementById('stat-xpchart');if(!el)return;
+  const hist=getHist().filter(h=>h.date!==TODAY).sort((a,b)=>a.date.localeCompare(b.date));
+  const{totXP}=stats();
+  let cum=0;
+  const cumPoints=hist.map(h=>{cum=Math.max(0,cum+(h.xp||0));return{date:h.date,xp:cum};}); // floor matches how the real total is computed elsewhere
+  cumPoints.push({date:TODAY,xp:totXP});
+
+  if(cumPoints.length<2){
+    el.innerHTML='<div style="color:var(--text3);font-size:13px;padding:.75rem 0">Not enough history yet — save a few more days to see your XP trend.</div>';
+    return;
+  }
+
+  const W=680,H=180,padL=44,padB=22,padT=10,padR=10;
+  const t0=new Date(cumPoints[0].date+'T00:00:00').getTime();
+  const t1=new Date(cumPoints[cumPoints.length-1].date+'T00:00:00').getTime();
+  const span=Math.max(1,t1-t0);
+  const maxXP=Math.max(1,...cumPoints.map(p=>p.xp));
+
+  const xAt=p=>padL+((new Date(p.date+'T00:00:00').getTime()-t0)/span)*(W-padL-padR);
+  const yAt=p=>padT+(1-(p.xp/maxXP))*(H-padT-padB);
+
+  const linePts=cumPoints.map(p=>`${xAt(p).toFixed(1)},${yAt(p).toFixed(1)}`).join(' ');
+  const areaPts=`${padL},${H-padB} ${linePts} ${xAt(cumPoints[cumPoints.length-1]).toFixed(1)},${H-padB}`;
+
+  const gridY=[0,.25,.5,.75,1].map(f=>{
+    const y=padT+f*(H-padT-padB);
+    const val=Math.round(maxXP*(1-f));
+    return`<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="var(--border)" stroke-width="1"/><text x="4" y="${y+3}" font-size="9" fill="var(--text3)" font-family="var(--mono)">${val}</text>`;
+  }).join('');
+
+  const firstLab=new Date(cumPoints[0].date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  const lastLab='Today';
+
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}">
+    ${gridY}
+    <polygon points="${areaPts}" fill="rgba(139,92,246,.15)"/>
+    <polyline points="${linePts}" fill="none" stroke="#8B5CF6" stroke-width="2"/>
+    <text x="${padL}" y="${H-6}" font-size="10" fill="var(--text3)" font-family="var(--mono)">${x(firstLab)}</text>
+    <text x="${W-padR-32}" y="${H-6}" font-size="10" fill="var(--text3)" font-family="var(--mono)">${x(lastLab)}</text>
+  </svg>`;
+}
+
+// Day-over-day XP bars — theme color if that day matched/beat the day before, red if it dropped.
+// (Cumulative XP can never go down by definition, so "upgrade/degrade" only makes sense day-to-day.)
+function renderDailyOutputChart(){
+  const el=document.getElementById('stat-daily');if(!el)return;
+  const hist=getHist().filter(h=>h.date!==TODAY).sort((a,b)=>a.date.localeCompare(b.date));
+  const{todXP}=stats();
+  const pts=hist.map(h=>({date:h.date,xp:h.xp||0}));
+  pts.push({date:TODAY,xp:todXP});
+  const recent=pts.slice(-30); // last 30 saved days keeps bars readable
+
+  if(recent.length<2){
+    el.innerHTML='<div style="color:var(--text3);font-size:13px;padding:.75rem 0">Not enough history yet — save a few more days to see day-to-day changes.</div>';
+    return;
+  }
+
+  const W=680,H=140,padL=8,padB=8,padT=8,padR=8;
+  const maxAbs=Math.max(1,...recent.map(p=>Math.abs(p.xp)));
+  const baseline=padT+(H-padT-padB)/2;
+  const halfH=(H-padT-padB)/2;
+  const bw=(W-padL-padR)/recent.length;
+
+  const bars=recent.map((p,i)=>{
+    const prev=i>0?recent[i-1].xp:p.xp;
+    const barLen=Math.max(1,(Math.abs(p.xp)/maxAbs)*halfH);
+    const bx=padL+i*bw;
+    const by=p.xp>=0?baseline-barLen:baseline;
+    const color=p.xp<0?'var(--incomplete)':(p.xp>=prev?'#8B5CF6':'var(--incomplete)');
+    const dlab=new Date(p.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    return`<rect x="${(bx+1).toFixed(1)}" y="${by.toFixed(1)}" width="${Math.max(1,bw-2).toFixed(1)}" height="${barLen.toFixed(1)}" rx="2" fill="${color}"><title>${x(dlab+': '+p.xp+' XP')}</title></rect>`;
+  }).join('');
+  const baselineLine=`<line x1="${padL}" y1="${baseline}" x2="${W-padR}" y2="${baseline}" stroke="var(--border)" stroke-width="1"/>`;
+
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}">${baselineLine}${bars}</svg>`;
+}
+
+// Totals grouped by day/week/month/year, toggled via the buttons above the chart.
+function renderTotalsChart(){
+  const el=document.getElementById('stat-totals');if(!el)return;
+  const map=statsDailyMap();
+  const entries=Object.keys(map).map(ds=>({date:ds,xp:map[ds].xp||0})).sort((a,b)=>a.date.localeCompare(b.date));
+
+  if(!entries.length){
+    el.innerHTML='<div style="color:var(--text3);font-size:13px;padding:.75rem 0">No data yet.</div>';
+    return;
+  }
+
+  const keyFor={
+    day:e=>e.date,
+    week:e=>{const d=new Date(e.date+'T00:00:00Z');const day0=new Date(d);day0.setUTCDate(d.getUTCDate()-d.getUTCDay());return day0.toISOString().split('T')[0];},
+    month:e=>e.date.slice(0,7),
+    year:e=>e.date.slice(0,4)
+  }[totalsPeriod];
+
+  const grouped={};
+  entries.forEach(e=>{const k=keyFor(e);grouped[k]=(grouped[k]||0)+e.xp;});
+  const keys=Object.keys(grouped).sort();
+  const recent=keys.slice(-24); // keep the bar count readable regardless of period
+
+  if(recent.length<2){
+    el.innerHTML='<div style="color:var(--text3);font-size:13px;padding:.75rem 0">Not enough history yet for this view — save a few more days to see totals build up.</div>';
+    return;
+  }
+
+  const labelFor={
+    day:k=>new Date(k+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}),
+    week:k=>'Wk of '+new Date(k+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}),
+    month:k=>new Date(k+'-01T12:00:00').toLocaleDateString('en-US',{month:'short',year:'2-digit'}),
+    year:k=>k
+  }[totalsPeriod];
+
+  const W=680,H=150,padL=8,padB=20,padT=8,padR=8;
+  const maxXP=Math.max(1,...recent.map(k=>grouped[k]));
+  const bw=(W-padL-padR)/recent.length;
+
+  const bars=recent.map((k,i)=>{
+    const val=grouped[k];
+    const bh=Math.max(1,(val/maxXP)*(H-padT-padB));
+    const bx=padL+i*bw,by=H-padB-bh;
+    return`<rect x="${(bx+1).toFixed(1)}" y="${by.toFixed(1)}" width="${Math.max(1,bw-2).toFixed(1)}" height="${bh.toFixed(1)}" rx="2" fill="#8B5CF6"><title>${x(labelFor(k)+': '+val+' XP')}</title></rect>`;
+  }).join('');
+
+  const firstLab=recent.length?labelFor(recent[0]):'';
+  const lastLab=recent.length?labelFor(recent[recent.length-1]):'';
+
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}">
+    ${bars}
+    <text x="${padL}" y="${H-4}" font-size="9" fill="var(--text3)" font-family="var(--mono)">${x(firstLab)}</text>
+    <text x="${W-padR-60}" y="${H-4}" font-size="9" fill="var(--text3)" font-family="var(--mono)">${x(lastLab)}</text>
+  </svg>`;
+}
+
+function renderSubjectBreakdown(){
+  const el=document.getElementById('stat-subjects');if(!el)return;
+  const map=statsDailyMap();
+  const trackedDays=Object.keys(map).length;
+
+  const agg={};
+  Object.values(map).forEach(rec=>{
+    (rec.bySubject||[]).forEach(s=>{
+      if(!agg[s.id])agg[s.id]={name:s.name,color:s.color,done:0,total:0,bad:false};
+      agg[s.id].done+=s.done;agg[s.id].total+=s.total;
+      agg[s.id].name=s.name;agg[s.id].color=s.color; // keep most recent name/color seen
+    });
+  });
+  const subjectRows=Object.values(agg).filter(s=>s.total>0).sort((a,b)=>b.total-a.total);
+
+  const badDaysCount=Object.values(map).filter(rec=>(rec.badCount||0)>0).length;
+  const hasBadHabits=getBadHabits().length>0;
+  const badPct=trackedDays?Math.round((badDaysCount/trackedDays)*100):0;
+
+  const dates=Object.keys(map).sort().reverse(); // most recent first
+  let clean=0;
+  for(const ds of dates){if((map[ds].badCount||0)===0)clean++;else break;}
+
+  if(!subjectRows.length&&!hasBadHabits){
+    el.innerHTML='<div style="color:var(--text3);font-size:13px;padding:.75rem 0">No data yet — this builds up as you save days going forward.</div>';
+    return;
+  }
+
+  const subjectHtml=subjectRows.map(s=>{
+    const pct=Math.round((s.done/s.total)*100);
+    return`<div style="padding:8px 0">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:4px">
+        <span>${x(s.name)}</span><span style="color:var(--text3);font-family:var(--mono)">${s.done}/${s.total} · ${pct}%</span>
+      </div>
+      <div class="hbw"><div class="hbr" style="width:${pct}%;background:${s.color||'var(--purple)'}"></div></div>
+    </div>`;
+  }).join('');
+
+  const badHtml=`<div style="padding:8px 0">
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:4px">
+      <span>⚠️ Days with a bad habit</span><span style="color:var(--text3);font-family:var(--mono)">${badDaysCount}/${trackedDays} days · ${badPct}%</span>
+    </div>
+    <div class="hbw"><div class="hbr" style="width:${badPct}%;background:var(--incomplete)"></div></div>
+  </div>`;
+
+  const cleanHtml=hasBadHabits?`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0 12px;border-bottom:1px solid var(--border);margin-bottom:2px">
+    <span style="font-size:12px;color:var(--text3)">Current clean streak</span>
+    <span style="font-size:16px;font-weight:600;color:${clean>0?'var(--purple)':'var(--text3)'}">${clean} day${clean===1?'':'s'}</span>
+  </div>`:'';
+
+  const badHeading=hasBadHabits?`<div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--incomplete);margin:14px 0 2px;padding-top:10px;border-top:1px solid var(--border)">⚠️ Bad Habits</div>`:'';
+
+  el.innerHTML=subjectHtml+(hasBadHabits?badHeading+cleanHtml+badHtml:'');
+}
+
+init();
+</script>
+</body>
+</html>
